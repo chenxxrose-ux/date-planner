@@ -232,6 +232,7 @@ button:focus-visible,select:focus-visible,input:focus-visible,summary:focus-visi
       <button class="chip" data-v="rain" aria-pressed="false">下雨備案</button>
       <button class="chip" data-v="sing" aria-pressed="false">要能唱歌</button>
       <button class="chip" data-v="nopr" aria-pressed="false">不要有公關的店</button>
+      <button class="chip" data-v="nohost" aria-pressed="false">不要酒店型</button>
     </div>
     <label class="field" style="margin-top:14px">兩人預算（元，含交通住宿）<input id="budget" type="number" inputmode="numeric" min="0" step="100"></label>
     <button class="btn primary big" id="goNext">照這個時間排</button>
@@ -664,7 +665,7 @@ function segments(ctx) {
 function candidates(role, ctx, region) {
   const f = new Set(ctx.filters), cats = ROLES[role].cats;
   return places.filter(p => (cats.includes(p.cat) || (role === 'nightview' && p.view)) && p.region === region && !mk(p.id).no && p.lat != null
-    && !(f.has('noqueue') && p.queue) && !(f.has('nopr') && p.pr) && !((f.has('indoor') || f.has('rain')) && !p.indoor)
+    && !(f.has('noqueue') && p.queue) && !(f.has('nopr') && p.pr) && !(f.has('nohost') && p.hostclub) && !((f.has('indoor') || f.has('rain')) && !p.indoor)
     && !(role === 'ktv' && p.cat === 'bar' && !p.karaoke)
     && !(role === 'gaybar' && (!p.lgbt || (prefs.lgbtType && prefs.lgbtType !== 'any' && p.lgbt !== prefs.lgbtType && !(prefs.lgbtType !== 'mixed' && p.lgbt === 'mixed')) || (prefs.noAdult && p.adult)))
     && !(role === 'bar' && p.lgbt && !ctx.fun.includes('gaybar'))
@@ -831,7 +832,7 @@ function reasons(p, s, ctx) {
   if (p.view && p.cat !== 'nightview') r.push({t:'看得到夜景', c:'hi'});
   if (p.lgbt) r.push({t: LGBT[p.lgbt], c:'hi'});
   if (p.adult) r.push({t:'成人取向', c:'w'});
-  if (p.pr) r.push({t:'有公關陪聊', c:'w'});
+  if (p.pr) r.push({t: p.hostclub ? '酒店型・小姐陪坐' : '有公關陪聊', c:'w'});
   if (p.suspect) r.push({t:'邀評多，星等可能偏高', c:'w'});
   const wt = wishText(m); if (wt) r.push({t: wt, c:'hi'});
   if (s.closed) r.push({t:'這個時間可能沒開', c:'no'});
@@ -1024,7 +1025,7 @@ function renderPlaces() {
     if (p.view) tg += '<li class="tag hi">看得到夜景</li>';
     if (p.lgbt) tg += '<li class="tag hi">' + LGBT[p.lgbt] + '</li>';
     if (p.adult) tg += '<li class="tag w">成人取向</li>';
-    if (p.pr) tg += '<li class="tag w">有公關</li>';
+    if (p.pr) tg += '<li class="tag w">' + (p.hostclub ? '酒店型・小姐陪坐' : '有公關') + '</li>';
     if (p.suspect) tg += '<li class="tag w">邀評多</li>';
     if (isNew(p)) tg += '<li class="tag w">新店觀察中</li>';
     if (wt) tg += '<li class="tag hi">' + wt + '</li>';
