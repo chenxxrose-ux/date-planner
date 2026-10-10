@@ -1,0 +1,27 @@
+name: 每週更新油價和電影
+on:
+  schedule:
+    - cron: '7 1 * * 5'   # 每週五 09:07（台灣時間）
+  workflow_dispatch:
+  push:
+    paths: ['scripts/update_weekly.py', '.github/workflows/weekly.yml']
+permissions:
+  contents: write
+concurrency: data-update
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - name: 更新
+        env:
+          DP_DEBUG: ${{ github.event_name == 'push' && '1' || '' }}
+        run: python scripts/update_weekly.py
+      - name: 存回 GitHub
+        run: |
+          git config user.name "date-planner-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add -A data debug 2>/dev/null || git add -A data
+          git diff --cached --quiet || (git commit -m "自動更新：油價、電影" && git push)
