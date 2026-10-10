@@ -138,6 +138,10 @@ input[type=date]::-webkit-date-and-time-value{text-align:left;margin:0}
 .ok{color:#2e7d4f}
 .dayhead{font-family:var(--serif);font-weight:700;font-size:15px;color:var(--accent-text);margin:16px 0 4px;padding-bottom:4px;border-bottom:1px solid var(--line)}
 .card.move{background:var(--accent-soft);border-color:transparent}
+.extra{margin-top:12px;padding:12px;border:1px solid var(--line);border-radius:14px;background:var(--paper)}
+.extra .top2 b{font-family:var(--serif);font-size:16px;color:var(--accent-text)}
+ol.mini{list-style:none;padding:0;margin:8px 0;display:grid;gap:4px;font-size:13.5px}
+ol.mini span{display:inline-block;width:48px;font-weight:700;font-variant-numeric:tabular-nums}
 .more{margin-top:12px;padding:12px;border-radius:14px;background:var(--accent-soft);font-size:14px}
 .more .row{margin-top:8px}
 .xbtn{border:0;background:none;color:var(--muted);font-size:18px;cursor:pointer;padding:0}
@@ -185,7 +189,7 @@ button:focus-visible,select:focus-visible,input:focus-visible,summary:focus-visi
     </div>
     <p class="label">去哪裡</p>
     <select id="region" aria-label="目的地"></select>
-    <p class="hint" id="regionInfo"></p>
+    <p class="hint" id="regionInfo" style="white-space:pre-line"></p>
     <p class="label">今天的電量</p>
     <div class="seg" id="energy"><button data-v="tired" aria-pressed="false">很累</button><button data-v="normal" aria-pressed="true">普通</button><button data-v="high" aria-pressed="false">精力充沛</button></div>
     <p class="label">交通</p>
@@ -211,8 +215,14 @@ button:focus-visible,select:focus-visible,input:focus-visible,summary:focus-visi
       <button class="chip" data-v="hairspa" aria-pressed="false">越式洗髮</button>
       <button class="chip" data-v="izakaya" aria-pressed="false">居酒屋</button>
       <button class="chip" data-v="bar" aria-pressed="false">酒吧</button>
+      <button class="chip" data-v="gaybar" aria-pressed="false">同志酒吧</button>
       <button class="chip" data-v="ktv" aria-pressed="false">唱歌</button>
       <button class="chip" data-v="cinema" aria-pressed="false">看電影</button>
+    </div>
+    <div id="lgbtBox" hidden>
+      <p class="label">同志酒吧要哪一種</p>
+      <div class="seg" id="lgbtType"><button data-v="any">都可以</button><button data-v="gay">男同</button><button data-v="lesbian">女同</button><button data-v="mixed">男女都歡迎</button></div>
+      <label class="chip" style="display:inline-flex;gap:6px;align-items:center;margin-top:8px"><input type="checkbox" id="noAdult" style="width:auto"> 不要成人取向的店</label>
     </div>
     <p class="label">條件</p>
     <div class="chips" id="filters">
@@ -245,6 +255,9 @@ button:focus-visible,select:focus-visible,input:focus-visible,summary:focus-visi
       <button class="chip" data-v="want" aria-pressed="false">有人想去</button>
       <button class="chip" data-v="been" aria-pressed="false">去過</button>
       <button class="chip" data-v="sing" aria-pressed="false">可以唱歌</button>
+      <button class="chip" data-v="view" aria-pressed="false">看得到夜景</button>
+      <button class="chip" data-v="lgbt" aria-pressed="false">同志酒吧</button>
+      <button class="chip" data-v="view" aria-pressed="false">看得到夜景</button>
       <button class="chip" data-v="new" aria-pressed="false">新店</button>
       <button class="chip" data-v="no" aria-pressed="false">不想去</button>
     </div>
@@ -354,7 +367,7 @@ const HOLIDAYS = {'2026-10-09':'國慶補假','2026-10-10':'國慶日','2026-10-
 const KINDS = ['吃','穿','用','玩'];
 
 let db = null, sample = null, places = [], marks = {}, trips = [], movies = [], expenses = [], meta = {};
-let prefs = {region:'ks', longMode:'auto', energy:'normal', transport:'scooter', filters:[], fun:[], budget:3000, depDate:'', depTime:'11:00', retDate:'', retTime:'21:40', kmplCar:12, kmplScooter:35, fuelPrice:0};
+let prefs = {region:'ks', longMode:'auto', energy:'normal', transport:'scooter', filters:[], fun:[], budget:3000, depDate:'', depTime:'11:00', retDate:'', retTime:'21:40', kmplCar:12, kmplScooter:35, fuelPrice:0, lgbtType:'any', noAdult:false};
 let plan = null, prefsLoaded = false;
 try { const s = localStorage.getItem('prefs2'); if (s) prefs = Object.assign(prefs, JSON.parse(s)); } catch(e) {}
 
@@ -507,7 +520,6 @@ function syncControls() {
   $('#depTimeTxt').textContent = prefs.depTime; $('#retTimeTxt').textContent = prefs.retTime;
   const nights = Math.max(0, dayDiff(prefs.depDate, prefs.retDate) - (toMin(prefs.retTime) < 300 ? 1 : 0));
   $('#tripLen').innerHTML = nights ? (nights + 1) + '天<br>' + nights + '夜' : '當天<br>來回';
-  $('#region').value = prefs.region; $('#regionInfo').textContent = regionInfo();
   $('#budget').value = prefs.budget;
   const R = REGIONS[prefs.region], showLong = prefs.transport === 'transit' && R && !R.local;
   $('#longBox').hidden = !showLong;
@@ -517,14 +529,42 @@ function syncControls() {
     $$('#longMode button').forEach(b => { b.setAttribute('aria-pressed', String(b.dataset.v === prefs.longMode)); b.onclick = () => { prefs.longMode = b.dataset.v; syncControls(); savePrefs(); }; });
   }
   $('#fuelBox').hidden = prefs.transport === 'transit';
+  $('#lgbtBox').hidden = !prefs.fun.includes('gaybar');
+  $$('#lgbtType button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.v === (prefs.lgbtType || 'any'))));
+  $('#noAdult').checked = !!prefs.noAdult;
+  fillRegions();
   $('#kmplLbl').firstChild.textContent = prefs.transport === 'car' ? '汽車油耗（每公升幾公里）' : '機車油耗（每公升幾公里）';
   $('#kmpl').value = prefs.transport === 'car' ? prefs.kmplCar : prefs.kmplScooter;
   $('#fuelPrice').value = prefs.fuelPrice || (meta.fuel && meta.fuel.price) || 32.7;
 }
+// 依路程遠近排區域，標出這次時間適合去哪
+function tripWindow() {
+  let w = dayDiff(prefs.depDate, prefs.retDate) * 1440 + toMin(prefs.retTime) - toMin(prefs.depTime);
+  if (w < 90 && toMin(prefs.retTime) < 300) w += 1440;
+  return w;
+}
+function fillRegions() {
+  const w = tripWindow(), nights = Math.max(0, Math.floor((dayDiff(prefs.depDate, prefs.retDate) * 1440 + toMin(prefs.retTime) - 300) / 1440) - Math.floor((toMin(prefs.depTime) - 300) / 1440));
+  const mode = prefs.transport, ml = {scooter:'騎車', car:'開車', transit:'大眾運輸'}[mode];
+  const fmt = m => m >= 60 ? Math.floor(m / 60) + ' 小時' + (m % 60 >= 10 ? ' ' + (m % 60) + ' 分' : '') : m + ' 分';
+  const rows = Object.entries(REGIONS).map(([k, R]) => {
+    const leg = longLeg(k, mode, 'auto'), mins = leg ? leg.mins : 0;
+    const bad = mode === 'scooter' && !R.local && !R.scooter;
+    const fit = R.local || (!bad && mins * 2 <= w * (nights ? 0.45 : 0.4) && (nights || mins <= 150));
+    return {k, R, mins, bad, fit};
+  }).sort((a, b) => a.mins - b.mins);
+  const B = [[0, '高雄附近'], [75, '1 小時多以內'], [150, '1 到 2 個半小時'], [240, '2 個半到 4 小時'], [9999, '4 小時以上']];
+  const groups = {};
+  rows.forEach(r => { const g = r.R.local ? B[0][1] : B.find(([lim]) => r.mins <= lim && lim > 0)[1]; (groups[g] = groups[g] || []).push(r); });
+  $('#region').innerHTML = Object.entries(groups).map(([g, list]) => '<optgroup label="' + g + '">' + list.map(r =>
+    '<option value="' + r.k + '">' + (r.fit && !r.R.local ? '★ ' : '') + r.R.name + (r.R.local ? '' : '・' + ml + '約 ' + fmt(r.mins)) + (r.bad ? '（不適合騎車）' : '') + '</option>').join('') + '</optgroup>').join('');
+  $('#region').value = prefs.region;
+  const fits = rows.filter(r => r.fit && !r.R.local).map(r => r.R.name);
+  $('#regionInfo').textContent = regionInfo() + (fits.length ? '\n這次' + (nights ? ' ' + (nights + 1) + ' 天 ' + nights + ' 夜' : '當天來回') + '，' + ml + '適合去：' + fits.join('、') + '（選單裡有 ★ 的）' : '\n這次時間比較短，建議在高雄附近玩。');
+}
 (function initRegionSelect() {
   const groups = {};
   Object.entries(REGIONS).forEach(([k, v]) => (groups[v.group] = groups[v.group] || []).push([k, v]));
-  $('#region').innerHTML = Object.entries(groups).map(([g, list]) => '<optgroup label="' + g + '">' + list.map(([k, v]) => '<option value="' + k + '">' + v.name + '</option>').join('') + '</optgroup>').join('');
   const opts = '<option value="">全部地區</option>' + Object.entries(REGIONS).map(([k, v]) => '<option value="' + k + '">' + REGION[k] + '</option>').join('');
   $('#fRegion').innerHTML = opts;
 })();
@@ -539,6 +579,8 @@ $$('#presets button').forEach(b => b.addEventListener('click', () => { applyPres
   if (id === 'depDate' && dayDiff(prefs.depDate, prefs.retDate) < 0) prefs.retDate = prefs.depDate;
   syncControls(); savePrefs();
 }));
+$$('#lgbtType button').forEach(b => b.addEventListener('click', () => { prefs.lgbtType = b.dataset.v; syncControls(); savePrefs(); }));
+$('#noAdult').addEventListener('change', e => { prefs.noAdult = e.target.checked; savePrefs(); });
 $('#region').addEventListener('change', e => { prefs.region = e.target.value; prefs.longMode = 'auto'; syncControls(); savePrefs(); });
 $('#budget').addEventListener('change', e => { prefs.budget = Math.max(0, +e.target.value || 0); savePrefs(); });
 $('#kmpl').addEventListener('change', e => { const v = Math.max(3, +e.target.value || 0); if (prefs.transport === 'car') prefs.kmplCar = v; else prefs.kmplScooter = v; savePrefs(); });
@@ -560,8 +602,9 @@ const ROLES = {
   fine:{label:'高級餐廳', cats:['fine']}, nightview:{label:'看夜景', cats:['nightview']}, snack:{label:'平價小吃', cats:['snack']}, bbq:{label:'燒肉', cats:['bbq']}, hotpot:{label:'火鍋', cats:['hotpot']},
   night:{label:'宵夜', cats:['market','izakaya','snack','hotpot','bbq','eat']},
   massage:{label:'按摩', cats:['massage']}, hairspa:{label:'越式洗髮', cats:['hairspa']}, izakaya:{label:'居酒屋', cats:['izakaya']},
-  bar:{label:'酒吧', cats:['bar']}, ktv:{label:'唱歌', cats:['ktv','bar']}, cinema:{label:'看電影', cats:['cinema']}
+  bar:{label:'酒吧', cats:['bar']}, gaybar:{label:'同志酒吧', cats:['bar']}, ktv:{label:'唱歌', cats:['ktv','bar']}, cinema:{label:'看電影', cats:['cinema']}
 };
+const LGBT = {gay:'🏳️‍🌈 男同志酒吧', lesbian:'🏳️‍🌈 女同志酒吧', mixed:'🏳️‍🌈 男女都歡迎'};
 const MEALS = new Set(['eat','eat2','fine','snack','bbq','hotpot','izakaya','night']);
 // 各時段可以放的行程
 const SLOT_OK = {
@@ -569,8 +612,8 @@ const SLOT_OK = {
   lunch:['fine','snack','bbq','hotpot','eat'],
   afternoon:['sight','shop','sweet','massage','hairspa','cinema','ktv','market','nightview'],
   dinner:['fine','snack','bbq','hotpot','izakaya','eat2','market'],
-  night:['nightview','market','bar','izakaya','ktv','cinema','massage','hairspa','hotpot','bbq','snack','sweet','sight'],
-  late:['bar','ktv','massage','hairspa','night','izakaya','hotpot','bbq','snack']
+  night:['nightview','market','bar','gaybar','izakaya','ktv','cinema','massage','hairspa','hotpot','bbq','snack','sweet','sight'],
+  late:['bar','gaybar','ktv','massage','hairspa','night','izakaya','hotpot','bbq','snack']
 };
 const DEFAULTS = {morning:['sight','sweet'], lunch:['eat'], afternoon:['sight','shop','sweet'], dinner:['eat2'], night:['nightview','market','sweet'], late:['night']};
 const slotOf = t => { const m = ((t % 1440) + 1440) % 1440; return m < 300 ? 'late' : m < 630 ? 'morning' : m < 840 ? 'lunch' : m < 1020 ? 'afternoon' : m < 1230 ? 'dinner' : 'night'; };
@@ -618,9 +661,12 @@ function segments(ctx) {
 }
 function candidates(role, ctx, region) {
   const f = new Set(ctx.filters), cats = ROLES[role].cats;
-  return places.filter(p => cats.includes(p.cat) && p.region === region && !mk(p.id).no && p.lat != null
+  return places.filter(p => (cats.includes(p.cat) || (role === 'nightview' && p.view)) && p.region === region && !mk(p.id).no && p.lat != null
     && !(f.has('noqueue') && p.queue) && !((f.has('indoor') || f.has('rain')) && !p.indoor)
-    && !(role === 'ktv' && p.cat === 'bar' && !p.karaoke));
+    && !(role === 'ktv' && p.cat === 'bar' && !p.karaoke)
+    && !(role === 'gaybar' && (!p.lgbt || (prefs.lgbtType && prefs.lgbtType !== 'any' && p.lgbt !== prefs.lgbtType && !(prefs.lgbtType !== 'mixed' && p.lgbt === 'mixed')) || (prefs.noAdult && p.adult)))
+    && !(role === 'bar' && p.lgbt && !ctx.fun.includes('gaybar'))
+    && !(ctx.transport === 'scooter' && region === 'ks' && (p.area === '左營區' || p.area === '楠梓區' || km(HOME, p) > 9.5)));
 }
 function weight(p, ctx) {
   const m = mk(p.id); let w = Math.exp((trust(p) - 4.2) * 3);
@@ -656,7 +702,7 @@ function chooseStop(role, ctx, from, t, exclude, endBy, backPt) {
 const shuffle = a => { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
 function makePlan(ctx, keep) {
   keep = keep || {};
-  const R = REGIONS[ctx.region], notes = [], exclude = new Set(), segs = segments(ctx), placedFun = new Set();
+  const R = REGIONS[ctx.region], notes = [], exclude = new Set(ctx.avoid || []), segs = segments(ctx), placedFun = new Set();
   Object.values(keep).forEach(list => list.forEach(k => { exclude.add(k.id); if (ctx.fun.includes(k.role)) placedFun.add(k.role); }));
   if (ctx.leg && ctx.leg.warn) notes.push(ctx.leg.warn);
   segs.forEach((sg, si) => {
@@ -697,7 +743,7 @@ function makePlan(ctx, keep) {
     }
   });
   const pl = {ctx, segs, notes, region: ctx.region, dropped: []};
-  ctx.fun.filter(f => !placedFun.has(f)).forEach(f => pl.notes.push('「' + ROLES[f].label + '」這次排不進去（時間或營業時間不合）。'));
+  ctx.fun.filter(f => !placedFun.has(f)).forEach(f => pl.notes.push('「' + ROLES[f].label + '」這套排不下，放到下面的其他建議行程。'));
   pl.missingFun = ctx.fun.filter(f => !placedFun.has(f));
   finalize(pl);
   return pl;
@@ -727,7 +773,7 @@ function finalize(pl) {
         const drop = pool.reduce((a, b) => (b.leave - b.arrive + b.tv) >= (a.leave - a.arrive + a.tv) ? b : a);
         sg.stops.splice(sg.stops.indexOf(drop), 1);
         pl.dropped.push({id: drop.id, role: drop.role});
-        pl.notes.push('時間不夠，已自動拿掉「' + byId(drop.id).name + '」。');
+        pl.notes.push('「' + byId(drop.id).name + '」這套排不下，移到下面的其他建議行程。');
         return finalize(pl);
       }
     }
@@ -780,6 +826,9 @@ function reasons(p, s, ctx) {
   const r = [], m = mk(p.id);
   if (p.favorite) r.push({t:'你們常去', c:'hi'});
   if (p.karaoke) r.push({t:'可以唱歌', c:'hi'});
+  if (p.view && p.cat !== 'nightview') r.push({t:'看得到夜景', c:'hi'});
+  if (p.lgbt) r.push({t: LGBT[p.lgbt], c:'hi'});
+  if (p.adult) r.push({t:'成人取向', c:'w'});
   if (p.suspect) r.push({t:'邀評多，星等可能偏高', c:'w'});
   const wt = wishText(m); if (wt) r.push({t: wt, c:'hi'});
   if (s.closed) r.push({t:'這個時間可能沒開', c:'no'});
@@ -858,11 +907,14 @@ function renderPlan() {
   const ls = plan.segs[plan.segs.length - 1];
   h += '<div class="home ' + cls + '">' + (ls.lastName ? '最晚 <b>' + esc(tLabel(ctx, ls.latestLeave)) + ' ' + hm(ls.latestLeave) + '</b> 要離開「' + esc(ls.lastName) + '」，' : '') + '才能在 ' + esc(tLabel(ctx, plan.deadline)) + ' ' + hm(plan.deadline) + ' 前到家。' + (slack < 0 ? '目前會超過，請拿掉一站。' : slack < 30 ? '時間有點趕。' : '時間很充裕。') + '</div>';
   if (ctx.budget && cost.total > ctx.budget) h += '<div class="home late">超過預算 ' + money(cost.total - ctx.budget) + ' 元。</div>';
-  const missing = [...new Set([...plan.dropped.map(d => byId(d.id).name), ...plan.missingFun.map(f => ROLES[f].label)])];
-  if (missing.length) {
-    h += '<div class="more"><b>還有 ' + missing.length + ' 個想去的排不進來</b><br>' + esc(missing.join('、')) + '<br>可以把「回到家」延後、多留一天，或按每站的「更多選擇」自己換。' +
-      '<div class="row"><button class="btn small primary" data-extend="1">多留一天再排</button></div></div>';
-  }
+  (plan.extras || []).forEach((ex, xi) => {
+    const exs = ex.segs.flatMap(sg => sg.stops);
+    h += '<div class="extra"><div class="top2"><b>建議行程 ' + (xi + 2) + '</b><span class="meta">兩人約 ' + money(ex.cost.total) + ' 元・' + exs.length + ' 站</span></div>' +
+      '<div class="meta">這套主打：' + esc(ex.ctx.fun.filter(f => !ex.missingFun.includes(f)).map(f => ROLES[f].label).join('、')) + '</div><ol class="mini">' +
+      ex.segs.map(sg => sg.stops.map(s => '<li><span>' + hm(s.arrive) + '</span>' + esc((ROLES[s.role] || {}).label || '') + '・' + esc(byId(s.id).name) + '</li>').join('')).join('') +
+      '</ol><button class="btn small primary" data-useextra="' + xi + '">改用這套</button></div>';
+  });
+  if (plan.unplaceable && plan.unplaceable.length) h += '<div class="more">「' + esc(plan.unplaceable.map(f => ROLES[f].label).join('、')) + '」在這個時間、這個地區找不到有開的店。可以換地區或換時間再排。</div>';
   h += '<div class="notes"><b>出發前要確認</b><ul>' + [...plan.notes, ...must].map(n => '<li>' + esc(n) + '</li>').join('') + '</ul></div>';
   h += '<div class="row" style="margin-top:12px"><button class="btn primary" id="savePlan">就決定這套</button></div>';
   el.innerHTML = h;
@@ -873,13 +925,14 @@ function renderPlan() {
   el.querySelectorAll('[data-swap]').forEach(b => b.onclick = () => swapStop(...at(b.dataset.swap).slice(0, 2)));
   el.querySelectorAll('[data-alts]').forEach(b => b.onclick = () => showAlts(b.dataset.alts));
   el.querySelectorAll('[data-bookt]').forEach(b => b.onclick = () => { const box = el.querySelector('[data-bookbox="' + b.dataset.bookt + '"]'); box.hidden = !box.hidden; });
+  el.querySelectorAll('[data-useextra]').forEach(b => b.onclick = () => { const all = [plan, ...plan.extras], i = +b.dataset.useextra + 1, np = all[i]; np.extras = all.filter((_, j) => j !== i).map(p => { p.extras = []; return p; }); np.ctx.fun = plan.ctx.fun; plan = np; renderPlan(); window.scrollTo({top: $('#planOut').offsetTop, behavior: 'smooth'}); });
   el.querySelectorAll('[data-extend]').forEach(b => b.onclick = () => { prefs.retDate = ymd(addDays(parseYmd(dateOfT(ctx, ctx.retT)), 1)); if (toMin(prefs.retTime) < 600) prefs.retTime = '21:00'; prefs.depDate = ctx.depDate; prefs.depTime = hm(ctx.depT); syncControls(); savePrefs(); go(false); });
   bindBooking(el);
 }
 function reroll() {
   const keep = {};
   plan.segs.forEach((sg, si) => sg.stops.forEach((s, i) => { if (s.locked) (keep[si] = keep[si] || []).push({id: s.id, role: s.role, at: i}); }));
-  plan = bestPlan(plan.ctx, keep); renderPlan();
+  const ex = plan.extras; plan = bestPlan(plan.ctx, keep); plan.extras = extrasFor(plan); renderPlan();
 }
 function altList(si, i) {
   const sg = plan.segs[si], s = sg.stops[i], ctx = plan.ctx, ref = byId(s.id);
@@ -906,9 +959,23 @@ function swapStop(si, i) {
   if (!got) { plan.notes.push('附近找不到其他有開的「' + ((ROLES[s.role] || {}).label || '') + '」，保留原本的店。'); renderPlan(); return; }
   s.id = got.p.id; s.locked = false; finalize(plan); renderPlan();
 }
+// 勾太多排不下的，不刪掉，排成第 2、3、4 套建議行程
+function extrasFor(main) {
+  const out = [], used = new Set(main.segs.flatMap(sg => sg.stops.map(s => s.id)));
+  let left = [...new Set([...main.missingFun, ...main.dropped.map(d => d.role).filter(r => main.ctx.fun.includes(r))])];
+  for (let i = 0; i < 3 && left.length; i++) {
+    const pl = bestPlan(Object.assign({}, main.ctx, {fun: left, avoid: [...used]}), {});
+    const got = left.filter(f => !pl.missingFun.includes(f));
+    if (!got.length) break;
+    pl.segs.forEach(sg => sg.stops.forEach(s => used.add(s.id)));
+    out.push(pl); left = left.filter(f => !got.includes(f));
+  }
+  main.unplaceable = left;
+  return out;
+}
 function go(live) {
   if (!places.length) { $('#planOut').innerHTML = '<div class="empty"><strong>地點資料還沒載入</strong>上方顯示「已載入」後再按一次。</div>'; return; }
-  plan = bestPlan(buildCtx(live), {}); renderPlan();
+  plan = bestPlan(buildCtx(live), {}); plan.extras = extrasFor(plan); renderPlan();
   $('#planOut').scrollIntoView({behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block:'start'});
 }
 $('#goNow').onclick = () => go(true);
@@ -939,7 +1006,7 @@ function renderPlaces() {
   const q = $('#q').value.trim(), r = $('#fRegion').value, c = $('#fCat').value;
   let list = places.filter(p => (!r || p.region === r) && (!c || p.cat === c) && (!q || (p.name + p.area + REGION[p.region] + (CAT[p.cat]||'')).includes(q))).filter(p => {
     const m = mk(p.id);
-    return !fStatus || (fStatus === 'fav' && p.favorite) || (fStatus === 'both' && m.me && m.cm) || (fStatus === 'want' && (m.me || m.cm)) || (fStatus === 'been' && m.been) || (fStatus === 'no' && m.no) || (fStatus === 'sing' && p.karaoke) || (fStatus === 'new' && isNew(p));
+    return !fStatus || (fStatus === 'fav' && p.favorite) || (fStatus === 'both' && m.me && m.cm) || (fStatus === 'want' && (m.me || m.cm)) || (fStatus === 'been' && m.been) || (fStatus === 'no' && m.no) || (fStatus === 'sing' && p.karaoke) || (fStatus === 'view' && (p.view || p.cat === 'nightview')) || (fStatus === 'lgbt' && p.lgbt) || (fStatus === 'new' && isNew(p));
   }).sort((a, b) => (b.favorite ? 1 : 0) - (a.favorite ? 1 : 0) || trust(b) - trust(a));
   const el = $('#plist');
   if (!list.length) { el.innerHTML = '<div class="empty"><strong>沒有符合的地點</strong>換個條件看看。</div>'; return; }
@@ -950,12 +1017,15 @@ function renderPlaces() {
     if (openSpan(p, 6, 22*60 + 30, 45)) tg += '<li class="tag">週日 22:30 後有開</li>';
     if (p.favorite) tg += '<li class="tag hi">你們常去</li>';
     if (p.karaoke) tg += '<li class="tag hi">可以唱歌</li>';
+    if (p.view) tg += '<li class="tag hi">看得到夜景</li>';
+    if (p.lgbt) tg += '<li class="tag hi">' + LGBT[p.lgbt] + '</li>';
+    if (p.adult) tg += '<li class="tag w">成人取向</li>';
     if (p.suspect) tg += '<li class="tag w">邀評多</li>';
     if (isNew(p)) tg += '<li class="tag w">新店觀察中</li>';
     if (wt) tg += '<li class="tag hi">' + wt + '</li>';
     if (m.been) tg += '<li class="tag">去過 ' + md(m.been) + '</li>';
     if (m.no) tg += '<li class="tag no">不想去</li>';
-    return '<details class="pl" data-id="' + p.id + '"' + (openSet.has(p.id) ? ' open' : '') + '><summary><div style="min-width:0"><div class="name" style="font-size:15px">' + esc(p.name) + '</div><div class="meta">' + esc(REGION[p.region]) + '・' + esc(p.area) + '・' + esc(CAT[p.cat] || '') + '</div><ul class="tags">' + tg + '</ul></div><div style="text-align:right">' + stars(p.rating) + '<div class="meta">' + (p.rating || '–') + '（' + money(p.reviews) + '）</div></div></summary>' +
+    return '<details class="pl" data-id="' + p.id + '"' + (openSet.has(p.id) ? ' open' : '') + '><summary><div style="min-width:0"><div class="name" style="font-size:15px">' + esc(p.name) + '</div><div class="meta">' + esc(REGION[p.region]) + (p.area && p.area !== REGION[p.region] ? '・' + esc(p.area) : '') + '・' + esc(CAT[p.cat] || '') + '</div><ul class="tags">' + tg + '</ul></div><div style="text-align:right">' + stars(p.rating) + '<div class="meta">' + (p.rating || '–') + '（' + money(p.reviews) + '）</div></div></summary>' +
       '<div class="body"><dl class="kv"><dt>推</dt><dd>' + esc(p.pros) + '</dd><dt>雷</dt><dd>' + esc(p.cons) + '</dd><dt>週一</dt><dd>' + hoursText(p, 0) + '</dd><dt>週日</dt><dd>' + hoursText(p, 6) + '</dd><dt>花費</dt><dd>' + priceText(p) + '</dd><dt>停車</dt><dd>' + esc(p.park) + '</dd>' + (p.transit ? '<dt>大眾運輸</dt><dd>' + esc(p.transit) + '</dd>' : '') + ((p.flags || []).length ? '<dt>注意</dt><dd>' + p.flags.map(esc).join('、') + '</dd>' : '') + '<dt>資料</dt><dd class="meta">' + esc(p.source) + '，' + md(p.checked) + '</dd></dl>' +
       '<div class="acts"><button class="btn small" data-mk="me" aria-pressed="' + !!m.me + '">我想去</button><button class="btn small" data-mk="cm" aria-pressed="' + !!m.cm + '">草莓想去</button><button class="btn small" data-mk="been" aria-pressed="' + !!m.been + '">去過</button><button class="btn small" data-mk="no" aria-pressed="' + !!m.no + '">不想去</button></div>' + bookingHtml(p) + '</div></details>';
   }).join('') + (list.length > renderLimit ? '<button class="btn" id="more" style="width:100%">再顯示 60 個</button>' : '');
