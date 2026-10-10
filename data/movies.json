@@ -5,7 +5,7 @@
   "genre": "動作、恐怖、科幻",
   "runtime": 94,
   "rating": 3.9,
-  "ratingSrc": "LINE TODAY 觀眾評分 7.8/10",
+  "ratingSrc": "LINE TODAY 觀眾評分 7.8/10（153 人）",
   "summary": "",
   "verdict": "普通",
   "checked": "2026-10-10"
@@ -16,7 +16,7 @@
   "genre": "冒險、動作、劇情、驚悚",
   "runtime": 101,
   "rating": 4.5,
-  "ratingSrc": "LINE TODAY 觀眾評分 9.1/10",
+  "ratingSrc": "LINE TODAY 觀眾評分 9.1/10（75 人）",
   "summary": "",
   "verdict": "觀眾評分很高",
   "checked": "2026-10-10"
@@ -49,7 +49,7 @@
   "genre": "動作、喜劇、驚悚",
   "runtime": 99,
   "rating": 4.7,
-  "ratingSrc": "LINE TODAY 觀眾評分 9.4/10",
+  "ratingSrc": "LINE TODAY 觀眾評分 9.4/10（32 人）",
   "summary": "",
   "verdict": "觀眾評分很高",
   "checked": "2026-10-10"
@@ -60,7 +60,7 @@
   "genre": "恐怖",
   "runtime": 87,
   "rating": 4.5,
-  "ratingSrc": "LINE TODAY 觀眾評分 8.9/10",
+  "ratingSrc": "LINE TODAY 觀眾評分 8.9/10（14 人）",
   "summary": "",
   "verdict": "觀眾評分很高",
   "checked": "2026-10-10"
@@ -82,7 +82,7 @@
   "genre": "恐怖",
   "runtime": 116,
   "rating": 2.6,
-  "ratingSrc": "LINE TODAY 觀眾評分 5.3/10",
+  "ratingSrc": "LINE TODAY 觀眾評分 5.3/10（61 人）",
   "summary": "",
   "verdict": "評價偏低",
   "checked": "2026-10-10"
@@ -93,7 +93,7 @@
   "genre": "劇情、喜劇",
   "runtime": 129,
   "rating": 4.2,
-  "ratingSrc": "LINE TODAY 觀眾評分 8.4/10",
+  "ratingSrc": "LINE TODAY 觀眾評分 8.4/10（27 人）",
   "summary": "",
   "verdict": "評價不錯",
   "checked": "2026-10-10"
@@ -104,7 +104,7 @@
   "genre": "冒險、動作、科幻",
   "runtime": 145,
   "rating": 4.5,
-  "ratingSrc": "LINE TODAY 觀眾評分 9.1/10",
+  "ratingSrc": "LINE TODAY 觀眾評分 9.1/10（224 人）",
   "summary": "",
   "verdict": "觀眾評分很高",
   "checked": "2026-10-10"
@@ -115,7 +115,7 @@
   "genre": "喜劇、家庭",
   "runtime": 122,
   "rating": 4.2,
-  "ratingSrc": "LINE TODAY 觀眾評分 8.5/10",
+  "ratingSrc": "LINE TODAY 觀眾評分 8.5/10（53 人）",
   "summary": "",
   "verdict": "評價不錯",
   "checked": "2026-10-10"
@@ -148,7 +148,7 @@
   "genre": "恐怖、驚悚、愛情",
   "runtime": 109,
   "rating": 3.6,
-  "ratingSrc": "LINE TODAY 觀眾評分 7.2/10",
+  "ratingSrc": "LINE TODAY 觀眾評分 7.2/10（60 人）",
   "summary": "",
   "verdict": "普通",
   "checked": "2026-10-10"
@@ -159,7 +159,7 @@
   "genre": "動畫、冒險、喜劇",
   "runtime": 99,
   "rating": 4.7,
-  "ratingSrc": "LINE TODAY 觀眾評分 9.3/10",
+  "ratingSrc": "LINE TODAY 觀眾評分 9.3/10（55 人）",
   "summary": "",
   "verdict": "觀眾評分很高",
   "checked": "2026-10-10"
@@ -170,7 +170,7 @@
   "genre": "動作",
   "runtime": 97,
   "rating": 3.6,
-  "ratingSrc": "LINE TODAY 觀眾評分 7.2/10",
+  "ratingSrc": "LINE TODAY 觀眾評分 7.2/10（18 人）",
   "summary": "",
   "verdict": "普通",
   "checked": "2026-10-10"
@@ -243,11 +243,11 @@
  },
  "a2610102": {
   "title": "猛鬼大學：4不瞑目",
-  "release": "",
-  "genre": "",
-  "runtime": null,
+  "release": "2026-09-24",
+  "genre": "劇情、恐怖、喜劇",
+  "runtime": 130,
   "rating": 4.8,
-  "ratingSrc": "LINE TODAY 觀眾評分 9.5/10",
+  "ratingSrc": "LINE TODAY 觀眾評分 9.5/10（14 人）",
   "summary": "",
   "verdict": "觀眾評分很高",
   "checked": "2026-10-10"
