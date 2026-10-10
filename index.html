@@ -3,7 +3,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="週一去哪">
-<meta name="theme-color" content="#f5f1e9">
+<meta name="theme-color" content="#fbf2f3" media="(prefers-color-scheme: light)"><meta name="theme-color" content="#1c1317" media="(prefers-color-scheme: dark)">
 <link rel="apple-touch-icon" href="icon.png">
 <style>:root{padding-top:env(safe-area-inset-top,0px)}[hidden]{display:none!important}img{max-width:100%}</style>
 </head><body>
@@ -12,28 +12,28 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@600;700&family=Noto+Sans+TC:wght@400;500;700&display=swap">
 <style>
-/* 手機單欄＋底部分頁列。奶茶紙色底、墨綠字、焦糖橘重點色（沿用你們喜歡的那版配色） */
+/* 手機單欄＋底部分頁列。玫瑰粉霧底、梅子色字、玫瑰紅重點色 */
 :root{
-  --bg:#f5f1e9; --paper:#fffdf8; --sunk:#edece3; --ink:#233c33; --muted:#6f786f; --line:#e6e3d8;
-  --accent:#c2703f; --accent-ink:#ffffff; --accent-soft:#f6e6da; --accent-text:#93512a;
-  --sage:#dce6db; --sage-text:#2f5f45;
-  --warn-soft:#fbefd9; --warn:#8a5a10; --bad-soft:#fbe4e1; --bad:#a63526;
-  --eat:#e2a77f; --wear:#9d8cc8; --use:#7fa9c0; --fun:#8fbf8a;
+  --bg:#fbf2f3; --paper:#fffafa; --sunk:#f4e6e9; --ink:#3d2430; --muted:#86697a; --line:#eedbe0;
+  --accent:#c94f6d; --accent-ink:#ffffff; --accent-soft:#fbe1e8; --accent-text:#a83a58;
+  --sage:#f7dfe5; --sage-text:#8e3552;
+  --warn-soft:#fdf0dc; --warn:#8a5a10; --bad-soft:#fbe4e1; --bad:#a63526;
+  --eat:#e8a0a8; --wear:#b39ad6; --use:#8fb3cf; --fun:#e6b980;
   --star:#d99a1e;
   --serif:"Noto Serif TC",Georgia,serif;
   --sans:"Noto Sans TC",-apple-system,"PingFang TC","Heiti TC",sans-serif;
 }
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
-  --bg:#141a17; --paper:#1c2420; --sunk:#252e29; --ink:#e7ece6; --muted:#9daa9f; --line:#2f3a34;
-  --accent:#e08a55; --accent-ink:#1b0f07; --accent-soft:#3a281c; --accent-text:#f0b48c;
-  --sage:#25362c; --sage-text:#9fd3b2;
+  --bg:#1c1317; --paper:#261a20; --sunk:#33222a; --ink:#f4e7eb; --muted:#bd9ea9; --line:#3d2a33;
+  --accent:#f07c99; --accent-ink:#2a0f18; --accent-soft:#45232f; --accent-text:#f7a9bc;
+  --sage:#3a2430; --sage-text:#f5b8c8;
   --warn-soft:#3a2f17; --warn:#f0c470; --bad-soft:#3d201c; --bad:#ff9a8a;
   --star:#f2b84b; color-scheme:dark;
 }}
 :root[data-theme="dark"]{
-  --bg:#141a17; --paper:#1c2420; --sunk:#252e29; --ink:#e7ece6; --muted:#9daa9f; --line:#2f3a34;
-  --accent:#e08a55; --accent-ink:#1b0f07; --accent-soft:#3a281c; --accent-text:#f0b48c;
-  --sage:#25362c; --sage-text:#9fd3b2;
+  --bg:#1c1317; --paper:#261a20; --sunk:#33222a; --ink:#f4e7eb; --muted:#bd9ea9; --line:#3d2a33;
+  --accent:#f07c99; --accent-ink:#2a0f18; --accent-soft:#45232f; --accent-text:#f7a9bc;
+  --sage:#3a2430; --sage-text:#f5b8c8;
   --warn-soft:#3a2f17; --warn:#f0c470; --bad-soft:#3d201c; --bad:#ff9a8a;
   --star:#f2b84b; color-scheme:dark;
 }
