@@ -54,6 +54,7 @@ input,select,textarea{font:15px var(--sans);color:var(--ink);background:var(--bg
 .row{display:flex;gap:8px;flex-wrap:wrap}
 .row>.btn{flex:1}
 .hint{font-size:13px;color:var(--muted);margin:8px 0 0}
+.hint a{color:var(--accent-text)}
 .stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:14px 0}
 .stat{background:var(--sage);border-radius:14px;padding:10px 6px;text-align:center}
 .stat b{display:block;font-size:17px;font-weight:700;font-variant-numeric:tabular-nums;color:var(--ink)}
@@ -105,8 +106,18 @@ dl.kv dd{margin:0}
 .dot{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:4px;vertical-align:-1px}
 .k-吃{background:var(--eat)} .k-穿{background:var(--wear)} .k-用{background:var(--use)} .k-玩{background:var(--fun)}
 .kind{font-size:11.5px;border-radius:6px;padding:1px 7px;color:#2a2a2a}
-.item{display:grid;grid-template-columns:62px minmax(0,1fr) 80px 28px;gap:6px;align-items:center;margin-top:6px}
+.item{display:grid;grid-template-columns:52px minmax(0,1fr) 72px 24px;gap:6px;align-items:center;margin-top:6px}
 .item select,.item input{padding:6px 8px;font-size:14px}
+input[type=date]{-webkit-appearance:none;appearance:none;display:block;min-height:40px;max-width:100%;text-align:left}
+input[type=date]::-webkit-date-and-time-value{text-align:left;margin:0}
+.item select{-webkit-appearance:none;appearance:none;text-align:center;padding:6px 2px}
+#tab-ledger,#receiptBox{max-width:100%;overflow-x:hidden}
+.alts{margin-top:8px;display:grid;gap:6px}
+.alt{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:center;padding:8px 10px;border-radius:10px;background:var(--sunk)}
+.alt .n{font-size:14px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.alt .m{font-size:12px;color:var(--muted)}
+.more{margin-top:12px;padding:12px;border-radius:14px;background:var(--accent-soft);font-size:14px}
+.more .row{margin-top:8px}
 .xbtn{border:0;background:none;color:var(--muted);font-size:18px;cursor:pointer;padding:0}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
 nav.tabbar{position:fixed;left:0;right:0;bottom:0;z-index:20;background:var(--paper);border-top:1px solid var(--line);padding:8px 10px calc(8px + env(safe-area-inset-bottom,0px))}
@@ -405,6 +416,7 @@ function buildCtx(live) {
   if (mode !== 'mon' && start < 12*60) start += 1440; // 週日夜跨過午夜
   let homeBy = toMin(prefs.homeTime) || 1300;
   if (homeBy <= start % 1440 || (mode !== 'mon' && homeBy < 12*60)) homeBy += 1440; // 比出發早，當作隔天凌晨
+  if (mode === 'sun' && homeBy > 27*60) { homeBy = 26*60; note = (note ? note + ' ' : '') + '週日夜先排到凌晨 2 點前到家；想玩整天請選「週一」或「過夜」。'; }
   if (homeBy - start < 90) { note = (note ? note + ' ' : '') + '「最晚到家」離出發太近，先用預設時間排。'; homeBy = mode === 'mon' ? 1300 : 26*60; }
   return {mode, start, live, note, energy:prefs.energy, transport:prefs.transport, filters:[...prefs.filters], fun:[...prefs.fun],
     region: mode === 'trip' ? prefs.tripRegion : 'ks', budget: +prefs.budget || 0,
@@ -440,6 +452,7 @@ function chooseStop(role, ctx, from, t, day, region, exclude) {
     const t0 = (day === 0 && EVENING.has(role)) ? Math.max(t + tv, 1050) : t + tv;
     const stay = Math.round(p.stay * STAY_SCALE[ctx.energy]), arrive = openAt(p, day, t0, stay, WAIT[role] ?? 40);
     if (arrive == null) continue;
+    if (p.cat === 'nightview' && arrive % 1440 >= 1230 && /偏暗|黃昏/.test(p.cons || '')) continue;
     let w = explore ? (mk(p.id).been ? 0.2 : 1) * Math.exp((trust(p) - 4.2) * 2) : weight(p, ctx);
     list.push({p, tv, stay, arrive, w: w * Math.exp(-tv / 25)});
   }
@@ -453,6 +466,7 @@ function makePlan(ctx, keep) {
   keep = keep || {};
   const notes = [], exclude = new Set(Object.values(keep)), stops = [];
   const roles = rolesFor(ctx.mode === 'trip' ? 'mon' : ctx.mode, ctx.energy, ctx.fun);
+  if (ctx.shuffle && !Object.keys(keep).length) for (let i = roles.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [roles[i], roles[j]] = [roles[j], roles[i]]; }
   let from = HOME, t, day, region = ctx.region, deadline;
   if (ctx.mode === 'trip') {
     const center = regionCenter(region);
@@ -483,7 +497,7 @@ function makePlan(ctx, keep) {
     stops.push({kind:'place', role, roleIndex: i, id: p0.p.id, locked: !!keep[i], day: day === 6 ? '週日' : '週一'});
     from = p0.p; t = p0.arrive + p0.stay;
   });
-  const pl = {ctx, stops, notes, region, day, deadline};
+  const pl = {ctx, stops, notes, region, day, deadline, dropped: []};
   finalize(pl);
   return pl;
 }
@@ -517,8 +531,10 @@ function finalize(pl) {
     const cand = pl.stops.filter((s, i) => i > si && s.kind === 'place' && !s.locked);
     if (cand.length) {
       const plain = cand.filter(s => !ctx.fun.includes(s.role));
-      const drop = (plain.length ? plain : cand)[(plain.length ? plain : cand).length - 1];
+      const pool = plain.length ? plain : cand;
+      const drop = pool.reduce((a, b) => (b.leave - b.arrive + b.tv) >= (a.leave - a.arrive + a.tv) ? b : a);
       pl.stops.splice(pl.stops.indexOf(drop), 1);
+      (pl.dropped = pl.dropped || []).push({id: drop.id, role: drop.role});
       pl.notes.push('時間不夠，已自動拿掉「' + byId(drop.id).name + '」。');
       return finalize(pl);
     }
@@ -537,10 +553,10 @@ function bestPlan(ctx, keep) {
     return funHit * 10000 + roles.length * 1000 - Math.min(over, 999) - (over ? 500 : 0);
   };
   let best = makePlan(ctx, keep), bs = score(best);
-  for (let i = 0; i < 20; i++) {
+  for (let i = 0; i < 40; i++) {
     const ok = !ctx.budget || planCost(best) <= ctx.budget;
     if (ok && best.notes.every(n => !n.includes('略過') && !n.includes('拿掉'))) break;
-    const pl = makePlan(ctx, keep), sc = score(pl);
+    const pl = makePlan(i % 2 ? Object.assign({}, ctx, {shuffle: true}) : ctx, keep), sc = score(pl);
     if (sc > bs) { best = pl; bs = sc; }
   }
   if (ctx.budget && planCost(best) > ctx.budget) best.notes.push('排不進預算 ' + money(ctx.budget) + ' 元，可以拿掉一站或提高預算。');
@@ -601,13 +617,19 @@ function renderPlan() {
     if (p.cat === 'cinema') { const tm = topMovie(); if (tm) h += '<div class="meta">最近評價好的片：<b>' + esc(tm.title) + '</b></div>'; }
     const rs = reasons(p, s, ctx);
     if (rs.length) h += '<ul class="tags">' + rs.map(r => '<li class="tag ' + (r.c || '') + '">' + esc(r.t) + '</li>').join('') + '</ul>';
-    h += '<div class="acts"><button class="btn small" data-lock="' + i + '" aria-pressed="' + !!s.locked + '">' + (s.locked ? '已鎖定' : '鎖定') + '</button><button class="btn small" data-swap="' + i + '">換這站</button><button class="btn small" data-bookt="' + i + '">預約</button><a class="btn small" target="_blank" rel="noopener" href="' + dirLink(p, ctx.transport) + '">導航</a></div>';
-    h += '<div data-bookbox="' + i + '" hidden>' + bookingHtml(p) + '</div>';
+    h += '<div class="acts"><button class="btn small" data-lock="' + i + '" aria-pressed="' + !!s.locked + '">' + (s.locked ? '已鎖定' : '鎖定') + '</button><button class="btn small" data-swap="' + i + '">隨機換</button><button class="btn small" data-alts="' + i + '">更多選擇</button><button class="btn small" data-bookt="' + i + '">預約</button><a class="btn small" target="_blank" rel="noopener" href="' + dirLink(p, ctx.transport) + '">導航</a></div>';
+    h += '<div data-bookbox="' + i + '" hidden>' + bookingHtml(p) + '</div><div class="alts" data-altbox="' + i + '" hidden></div>';
     h += '</div></li>';
   });
   h += '<li class="leg">↓ 回家約 ' + plan.homeTv + ' 分（估）</li></ol>';
   const slack = plan.deadline - plan.homeAt, cls = slack < 0 ? 'late' : slack < 30 ? 'tight' : '';
   h += '<div class="home ' + cls + '">' + (plan.lastName ? '最晚 <b>' + hm(plan.latestLeave) + '</b> 要離開「' + esc(plan.lastName) + '」，' : '') + '才能在 ' + hm(plan.deadline) + ' 前到家。' + (slack < 0 ? '目前會超過，請拿掉一站。' : slack < 30 ? '時間有點趕。' : '時間很充裕。') + '</div>';
+  if (plan.dropped && plan.dropped.length) {
+    const hrs = Math.round((plan.deadline - plan.stops.find(s => s.kind === 'start').time) / 30) / 2;
+    h += '<div class="more"><b>還有 ' + plan.dropped.length + ' 個想去的排不進來</b><br>' + esc(plan.dropped.map(d => byId(d.id).name).join('、')) +
+      (ctx.mode === 'sun' ? '<br>週日晚上只有約 ' + hrs + ' 小時，想多去幾個可以改成週一整天，或過夜。' : '<br>可以延後「最晚到家」，或拿掉一站換進來。') +
+      '<div class="row">' + (ctx.mode !== 'mon' ? '<button class="btn small primary" data-remode="mon">改排週一整天</button>' : '') + (ctx.mode !== 'trip' ? '<button class="btn small" data-remode="trip">改過夜</button>' : '') + '</div></div>';
+  }
   if (ctx.budget && cost > ctx.budget) h += '<div class="home late">超過預算 ' + money(cost - ctx.budget) + ' 元。</div>';
   h += '<div class="notes"><b>出發前要確認</b><ul>' + [...plan.notes, ...must].map(n => '<li>' + esc(n) + '</li>').join('') + '</ul></div>';
   h += '<div class="row" style="margin-top:12px"><button class="btn primary" id="savePlan">就決定這套</button></div>';
@@ -616,6 +638,8 @@ function renderPlan() {
   $('#savePlan').onclick = saveTrip;
   el.querySelectorAll('[data-lock]').forEach(b => b.onclick = () => { const s = plan.stops[+b.dataset.lock]; s.locked = !s.locked; renderPlan(); });
   el.querySelectorAll('[data-swap]').forEach(b => b.onclick = () => swapStop(+b.dataset.swap));
+  el.querySelectorAll('[data-alts]').forEach(b => b.onclick = () => showAlts(+b.dataset.alts, b));
+  el.querySelectorAll('[data-remode]').forEach(b => b.onclick = () => { prefs.mode = b.dataset.remode; prefs.startTime = prefs.mode === 'mon' ? '11:00' : '22:00'; if (prefs.mode === 'mon') prefs.homeTime = '21:40'; syncControls(); savePrefs(); go(false); });
   el.querySelectorAll('[data-bookt]').forEach(b => b.onclick = () => { const box = el.querySelector('[data-bookbox="' + b.dataset.bookt + '"]'); box.hidden = !box.hidden; });
   bindBooking(el);
 }
@@ -623,6 +647,27 @@ function reroll() {
   const keep = {};
   plan.stops.forEach(s => { if (s.kind === 'place' && s.locked) { if (s.role === 'night' && plan.ctx.mode === 'trip') keep.n = s.id; else keep[s.roleIndex] = s.id; } });
   plan = bestPlan(plan.ctx, keep); renderPlan();
+}
+function altList(i) {
+  const s = plan.stops[i], ctx = plan.ctx, ref = byId(s.id);
+  const used = new Set(plan.stops.filter(x => x.kind === 'place').map(x => x.id));
+  const prevP = [...plan.stops.slice(0, i)].reverse().find(x => x.kind === 'place');
+  const from = prevP ? byId(prevP.id) : ctx.mode === 'trip' ? regionCenter(plan.region) : HOME;
+  const day = ctx.mode === 'sun' || (ctx.mode === 'trip' && s.role === 'night') ? 6 : 0;
+  const t = s.arrive - s.tv, cats = (ROLES[s.role] || {cats:[ref.cat]}).cats;
+  return candidates(s.role in ROLES ? s.role : 'eat', ctx, ref.region).filter(p => cats.includes(p.cat) && !used.has(p.id)).map(p => {
+    const tv = travel(from, p, ctx.transport), stay = Math.round(p.stay * STAY_SCALE[ctx.energy]);
+    return {p, tv, ok: !!openSpan(p, day, t + tv, stay)};
+  }).filter(x => x.ok && x.tv <= 60).sort((a, b) => (b.p.favorite ? 1 : 0) - (a.p.favorite ? 1 : 0) || (trust(b.p) - b.tv / 60) - (trust(a.p) - a.tv / 60));
+}
+function showAlts(i, btn) {
+  const box = document.querySelector('[data-altbox="' + i + '"]');
+  if (!box.hidden) { box.hidden = true; return; }
+  const list = altList(i).slice(0, 10);
+  box.innerHTML = list.length ? list.map(x => '<div class="alt"><div style="min-width:0"><div class="n">' + esc(x.p.name) + '</div><div class="m">' + stars(x.p.rating) + ' ' + (x.p.rating || '–') + '（' + money(x.p.reviews) + '）・' + esc(x.p.area) + '・' + priceText(x.p).replace('（估）', '') + '・約 ' + x.tv + ' 分' + (x.p.karaoke ? '・可唱歌' : '') + '</div></div><button class="btn small" data-pickalt="' + x.p.id + '">換這家</button></div>').join('')
+    : '<p class="hint">這個時間附近沒有其他有開的。</p>';
+  box.hidden = false;
+  box.querySelectorAll('[data-pickalt]').forEach(b => b.onclick = () => { const s = plan.stops[i]; s.id = b.dataset.pickalt; s.locked = true; finalize(plan); renderPlan(); });
 }
 function swapStop(i) {
   const s = plan.stops[i], ctx = plan.ctx, ref = byId(s.id);
