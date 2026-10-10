@@ -32,8 +32,41 @@ def search(q, lat, lng, radius):
                        'locationBias': {'circle': {'center': {'latitude': lat, 'longitude': lng}, 'radius': radius}}}).encode()
     req = urllib.request.Request('https://places.googleapis.com/v1/places:searchText', data=body, headers={
         'Content-Type': 'application/json', 'X-Goog-Api-Key': KEY,
-        'X-Goog-FieldMask': 'places.id,places.displayName,places.location,places.rating,places.userRatingCount,places.regularOpeningHours,places.priceLevel,places.nationalPhoneNumber,places.types,places.formattedAddress,places.businessStatus'})
+        'X-Goog-FieldMask': 'places.id,places.displayName,places.location,places.rating,places.userRatingCount,places.regularOpeningHours,places.priceLevel,places.nationalPhoneNumber,places.types,places.formattedAddress,places.businessStatus,places.reviews'})
     with urllib.request.urlopen(req, timeout=30) as r: return json.loads(r.read()).get('places', [])
+
+# 從評論整理「推」和「雷」：抓關鍵字歸類，再挑一句最短、最具體的好評當例子
+PROS = [(r'好吃|美味|好喝|讚|必點|推薦|驚艷|入味|鮮甜|新鮮', '好吃'), (r'服務(很|超|非常)?(好|親切|周到|貼心)|親切|熱情|貼心', '服務親切'),
+        (r'乾淨|整潔|衛生(很)?好', '環境乾淨'), (r'氣氛|浪漫|約會|情調|裝潢|好拍|景觀|夜景', '氣氛好'), (r'CP值|cp值|划算|平價|便宜|實惠', 'CP 值高'),
+        (r'份量(很|超)?(大|多|足)|吃很飽|吃得很飽', '份量足'), (r'舒服|放鬆|手法|力道', '按得舒服'), (r'調酒|酒單|酒很', '調酒好喝'),
+        (r'安靜|適合聊天|不吵', '安靜好聊天')]
+CONS = [(r'等(很|超|了)?久|排隊|等位|上菜(很|超)?慢|出餐(很|超)?慢', '要等比較久'), (r'(很|偏|有點|太)貴|價格(偏)?高|不便宜|CP值(很)?低', '價格偏高'),
+        (r'份量(很|偏|有點|太)?少|吃不飽', '份量偏少'), (r'態度(很|超|不|差)|服務(很|超)?差|不耐煩|臭臉', '服務態度有負評'),
+        (r'(很|太|有點)吵|吵雜', '比較吵'), (r'停車(很|不)?(難|不好|不便)|沒有停車|難停', '停車不好找'),
+        (r'(太|偏|很|有點)鹹|太甜|(太|很)油', '口味偏重'), (r'冷掉|不新鮮|腥', '有評論說不新鮮'), (r'(很|太|有點)擠|座位(很)?小|空間(很)?小', '座位擠'),
+        (r'限時|低消|服務費', '有限時或低消'), (r'推銷|加購|強迫', '有推銷'), (r'蟑螂|蒼蠅|不衛生|髒', '有衛生負評')]
+SUSPECT = re.compile(r'打卡|評論送|五星送|好評送|送(一|小)?(杯|份|個)')
+
+def summarize(reviews):
+    pos, neg, quotes, sus = {}, {}, [], 0
+    for rv in reviews or []:
+        t = ((rv.get('originalText') or rv.get('text') or {}).get('text') or '').replace('\n', ' ')
+        r = rv.get('rating') or 0
+        if SUSPECT.search(t): sus += 1
+        for pat, lab in PROS:
+            if r >= 4 and re.search(pat, t): pos[lab] = pos.get(lab, 0) + 1
+        for pat, lab in CONS:
+            if re.search(pat, t): neg[lab] = neg.get(lab, 0) + (2 if r <= 3 else 1)
+        if r >= 4 and re.search(r'[\u4e00-\u9fff]', t):
+            for sent in re.split(r'[。！!？?\n～~]+', t):
+                sent = sent.strip(' ，,、')
+                if 6 <= len(sent) <= 26 and re.search(r'[\u4e00-\u9fff]', sent) and not SUSPECT.search(sent): quotes.append(sent)
+    best = sorted(pos, key=lambda k: -pos[k])[:3]
+    q = sorted(quotes, key=lambda x: (-sum(1 for pat, _ in PROS if re.search(pat, x)), len(x)))[:1]
+    pros = '、'.join(best) + ('；評論：「' + q[0] + '」' if q else '')
+    bad = sorted(neg, key=lambda k: -neg[k])[:4]
+    cons = '、'.join(bad) if bad else ('評論沒有明顯缺點' if reviews else '還沒有評論可參考')
+    return pros, cons, sus >= 2, '要等比較久' in neg
 
 def hours(p):
     oh = p.get('regularOpeningHours') or {}
@@ -84,13 +117,15 @@ def main():
             if reg == 'ks' and not any(a in addr for a in KS_AREAS): continue
             hr = hours(p)
             if cat != 'sight' and not hr: continue
+            pros, cons, sus, queue = summarize(p.get('reviews'))
+            if '有衛生負評' in cons: continue
             pid = 'g_' + re.sub(r'[^A-Za-z0-9]', '', p['id'])[-12:]
             price = PRICE[cat]
             places[pid] = {'name': name, 'cat': cat, 'region': reg, 'area': AREA[reg], 'lat': round(loc['latitude'], 6), 'lng': round(loc['longitude'], 6),
                 'rating': r, 'reviews': n, 'price': price, 'stay': STAY[cat], 'hours': hr or [[[0, 1440]] for _ in range(7)],
-                'indoor': cat != 'sight', 'queue': False, 'park': '停車資訊未確認', 'ride': 'scooter' if reg == 'ks' else 'car', 'transit': '',
-                'pros': '新店，Google 評價 %.1f（%d 則）' % (r, n), 'cons': '自動加入，評論還少，去之前先看一下評論',
-                'flags': ['自動加入，尚未人工確認'], 'placeId': p['id'], 'checked': NOW.strftime('%Y-%m-%d'), 'source': 'Google 地圖',
+                'indoor': cat != 'sight', 'queue': queue, 'park': '停車資訊未確認', 'ride': 'scooter' if reg == 'ks' else 'car', 'transit': '',
+                'pros': pros or '新店，Google 評價 %.1f（%d 則）' % (r, n), 'cons': cons + ('；新店評論還少' if n < 60 else ''),
+                'flags': ['自動加入，推和雷由最新評論整理'], 'suspect': sus, 'placeId': p['id'], 'checked': NOW.strftime('%Y-%m-%d'), 'source': 'Google 地圖評論（自動整理）',
                 'isNew': True, 'addedBy': '每月自動找', 'phone': p.get('nationalPhoneNumber', ''), 'karaoke': cat == 'ktv',
                 'priceRange': [price, round(price * 0.7), round(price * 1.5)] if price else [0, 0, 0]}
             have.add(p['id']); have.add(name); added.append('%s（%s，%.1f）' % (name, AREA[reg], r))
