@@ -18,7 +18,7 @@ KS_AREAS = ['鳳山', '苓雅', '新興', '前金', '前鎮', '三民', '鹽埕'
 KS_QUERIES = [('eat', '新開幕 餐廳'), ('izakaya', '新開 居酒屋'), ('bar', '新開 酒吧 調酒'), ('dessert', '新開 甜點 咖啡廳'),
               ('bbq', '新開 燒肉'), ('hotpot', '新開 火鍋'), ('snack', '新開 小吃'), ('massage', '新開 按摩 SPA'), ('hairspa', '越式洗髮 推薦'), ('ktv', '新開 KTV 歡唱')]
 OTHER_QUERIES = [('eat', '新開幕 餐廳'), ('dessert', '新開 甜點 咖啡'), ('bar', '新開 酒吧'), ('sight', '新景點')]
-BAD = re.compile(r'公關|陪酒|小吃部|女性|女子|限女|產後|月子|坐月子|伴唱|卡拉OK小吃|按摩院|理容')
+BAD = re.compile(r'小吃部|女性|女子|限女|產後|月子|坐月子|伴唱|卡拉OK小吃|按摩院|理容')
 PRICE = {'eat': 400, 'fine': 1500, 'snack': 120, 'bbq': 800, 'hotpot': 500, 'dessert': 220, 'izakaya': 700, 'bar': 600, 'massage': 1200, 'hairspa': 600, 'ktv': 500, 'sight': 0}
 STAY = {'eat': 75, 'fine': 120, 'snack': 40, 'bbq': 100, 'hotpot': 90, 'dessert': 50, 'izakaya': 100, 'bar': 100, 'massage': 90, 'hairspa': 60, 'ktv': 120, 'sight': 75}
 
@@ -118,6 +118,8 @@ def main():
             hr = hours(p)
             if cat != 'sight' and not hr: continue
             pros, cons, sus, queue = summarize(p.get('reviews'))
+            revtxt = ' '.join(((x.get('originalText') or x.get('text') or {}).get('text') or '') for x in (p.get('reviews') or []))
+            has_pr = bool(re.search(r'\bPRs?\b|公關|hostess|陪酒|陪聊|talking bar', name + ' ' + revtxt, re.I))
             if '有衛生負評' in cons: continue
             pid = 'g_' + re.sub(r'[^A-Za-z0-9]', '', p['id'])[-12:]
             price = PRICE[cat]
@@ -125,7 +127,7 @@ def main():
                 'rating': r, 'reviews': n, 'price': price, 'stay': STAY[cat], 'hours': hr or [[[0, 1440]] for _ in range(7)],
                 'indoor': cat != 'sight', 'queue': queue, 'park': '停車資訊未確認', 'ride': 'scooter' if reg == 'ks' else 'car', 'transit': '',
                 'pros': pros or '新店，Google 評價 %.1f（%d 則）' % (r, n), 'cons': cons + ('；新店評論還少' if n < 60 else ''),
-                'flags': ['自動加入，推和雷由最新評論整理'], 'suspect': sus, 'placeId': p['id'], 'checked': NOW.strftime('%Y-%m-%d'), 'source': 'Google 地圖評論（自動整理）',
+                'flags': ['自動加入，推和雷由最新評論整理'], 'suspect': sus, 'pr': has_pr, 'prFee': '評論沒寫公關費，入座前先問清楚低消和怎麼算' if has_pr else '', 'placeId': p['id'], 'checked': NOW.strftime('%Y-%m-%d'), 'source': 'Google 地圖評論（自動整理）',
                 'isNew': True, 'addedBy': '每月自動找', 'phone': p.get('nationalPhoneNumber', ''), 'karaoke': cat == 'ktv',
                 'priceRange': [price, round(price * 0.7), round(price * 1.5)] if price else [0, 0, 0]}
             have.add(p['id']); have.add(name); added.append('%s（%s，%.1f）' % (name, AREA[reg], r))

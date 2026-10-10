@@ -231,6 +231,7 @@ button:focus-visible,select:focus-visible,input:focus-visible,summary:focus-visi
       <button class="chip" data-v="noqueue" aria-pressed="false">不想排隊</button>
       <button class="chip" data-v="rain" aria-pressed="false">下雨備案</button>
       <button class="chip" data-v="sing" aria-pressed="false">要能唱歌</button>
+      <button class="chip" data-v="nopr" aria-pressed="false">不要有公關的店</button>
     </div>
     <label class="field" style="margin-top:14px">兩人預算（元，含交通住宿）<input id="budget" type="number" inputmode="numeric" min="0" step="100"></label>
     <button class="btn primary big" id="goNext">照這個時間排</button>
@@ -257,6 +258,7 @@ button:focus-visible,select:focus-visible,input:focus-visible,summary:focus-visi
       <button class="chip" data-v="sing" aria-pressed="false">可以唱歌</button>
       <button class="chip" data-v="view" aria-pressed="false">看得到夜景</button>
       <button class="chip" data-v="lgbt" aria-pressed="false">同志酒吧</button>
+      <button class="chip" data-v="pr" aria-pressed="false">有公關</button>
       <button class="chip" data-v="view" aria-pressed="false">看得到夜景</button>
       <button class="chip" data-v="new" aria-pressed="false">新店</button>
       <button class="chip" data-v="no" aria-pressed="false">不想去</button>
@@ -662,7 +664,7 @@ function segments(ctx) {
 function candidates(role, ctx, region) {
   const f = new Set(ctx.filters), cats = ROLES[role].cats;
   return places.filter(p => (cats.includes(p.cat) || (role === 'nightview' && p.view)) && p.region === region && !mk(p.id).no && p.lat != null
-    && !(f.has('noqueue') && p.queue) && !((f.has('indoor') || f.has('rain')) && !p.indoor)
+    && !(f.has('noqueue') && p.queue) && !(f.has('nopr') && p.pr) && !((f.has('indoor') || f.has('rain')) && !p.indoor)
     && !(role === 'ktv' && p.cat === 'bar' && !p.karaoke)
     && !(role === 'gaybar' && (!p.lgbt || (prefs.lgbtType && prefs.lgbtType !== 'any' && p.lgbt !== prefs.lgbtType && !(prefs.lgbtType !== 'mixed' && p.lgbt === 'mixed')) || (prefs.noAdult && p.adult)))
     && !(role === 'bar' && p.lgbt && !ctx.fun.includes('gaybar'))
@@ -829,6 +831,7 @@ function reasons(p, s, ctx) {
   if (p.view && p.cat !== 'nightview') r.push({t:'看得到夜景', c:'hi'});
   if (p.lgbt) r.push({t: LGBT[p.lgbt], c:'hi'});
   if (p.adult) r.push({t:'成人取向', c:'w'});
+  if (p.pr) r.push({t:'有公關陪聊', c:'w'});
   if (p.suspect) r.push({t:'邀評多，星等可能偏高', c:'w'});
   const wt = wishText(m); if (wt) r.push({t: wt, c:'hi'});
   if (s.closed) r.push({t:'這個時間可能沒開', c:'no'});
@@ -887,6 +890,7 @@ function renderPlan() {
       h += '<div class="meta">' + stars(p.rating) + ' ' + (p.rating || '') + '・' + money(p.reviews) + ' 則・' + esc(p.pros) + '</div>';
       if (p.cons && !/沒有明顯缺點/.test(p.cons)) h += '<div class="meta">雷：' + esc(p.cons) + '</div>';
       h += '<div class="meta">' + (p.price ? priceText(p) : '免費或依現場') + (ctx.transport === 'transit' ? '' : '・停車：' + esc(p.park)) + (ctx.transport === 'transit' && p.transit ? '・' + esc(p.transit) : '') + '</div>';
+      if (p.pr && p.prFee) h += '<div class="meta" style="color:var(--warn)">' + esc(p.prFee) + '</div>';
       if (p.cat === 'cinema') { const tm = topMovie(); if (tm) h += '<div class="meta">最近評價好的片：<b>' + esc(tm.title) + '</b></div>'; }
       const rs = reasons(p, s, ctx);
       if (rs.length) h += '<ul class="tags">' + rs.map(r => '<li class="tag ' + (r.c || '') + '">' + esc(r.t) + '</li>').join('') + '</ul>';
@@ -1006,7 +1010,7 @@ function renderPlaces() {
   const q = $('#q').value.trim(), r = $('#fRegion').value, c = $('#fCat').value;
   let list = places.filter(p => (!r || p.region === r) && (!c || p.cat === c) && (!q || (p.name + p.area + REGION[p.region] + (CAT[p.cat]||'')).includes(q))).filter(p => {
     const m = mk(p.id);
-    return !fStatus || (fStatus === 'fav' && p.favorite) || (fStatus === 'both' && m.me && m.cm) || (fStatus === 'want' && (m.me || m.cm)) || (fStatus === 'been' && m.been) || (fStatus === 'no' && m.no) || (fStatus === 'sing' && p.karaoke) || (fStatus === 'view' && (p.view || p.cat === 'nightview')) || (fStatus === 'lgbt' && p.lgbt) || (fStatus === 'new' && isNew(p));
+    return !fStatus || (fStatus === 'fav' && p.favorite) || (fStatus === 'both' && m.me && m.cm) || (fStatus === 'want' && (m.me || m.cm)) || (fStatus === 'been' && m.been) || (fStatus === 'no' && m.no) || (fStatus === 'sing' && p.karaoke) || (fStatus === 'view' && (p.view || p.cat === 'nightview')) || (fStatus === 'lgbt' && p.lgbt) || (fStatus === 'pr' && p.pr) || (fStatus === 'new' && isNew(p));
   }).sort((a, b) => (b.favorite ? 1 : 0) - (a.favorite ? 1 : 0) || trust(b) - trust(a));
   const el = $('#plist');
   if (!list.length) { el.innerHTML = '<div class="empty"><strong>沒有符合的地點</strong>換個條件看看。</div>'; return; }
@@ -1020,13 +1024,14 @@ function renderPlaces() {
     if (p.view) tg += '<li class="tag hi">看得到夜景</li>';
     if (p.lgbt) tg += '<li class="tag hi">' + LGBT[p.lgbt] + '</li>';
     if (p.adult) tg += '<li class="tag w">成人取向</li>';
+    if (p.pr) tg += '<li class="tag w">有公關</li>';
     if (p.suspect) tg += '<li class="tag w">邀評多</li>';
     if (isNew(p)) tg += '<li class="tag w">新店觀察中</li>';
     if (wt) tg += '<li class="tag hi">' + wt + '</li>';
     if (m.been) tg += '<li class="tag">去過 ' + md(m.been) + '</li>';
     if (m.no) tg += '<li class="tag no">不想去</li>';
     return '<details class="pl" data-id="' + p.id + '"' + (openSet.has(p.id) ? ' open' : '') + '><summary><div style="min-width:0"><div class="name" style="font-size:15px">' + esc(p.name) + '</div><div class="meta">' + esc(REGION[p.region]) + (p.area && p.area !== REGION[p.region] ? '・' + esc(p.area) : '') + '・' + esc(CAT[p.cat] || '') + '</div><ul class="tags">' + tg + '</ul></div><div style="text-align:right">' + stars(p.rating) + '<div class="meta">' + (p.rating || '–') + '（' + money(p.reviews) + '）</div></div></summary>' +
-      '<div class="body"><dl class="kv"><dt>推</dt><dd>' + esc(p.pros) + '</dd><dt>雷</dt><dd>' + esc(p.cons) + '</dd><dt>週一</dt><dd>' + hoursText(p, 0) + '</dd><dt>週日</dt><dd>' + hoursText(p, 6) + '</dd><dt>花費</dt><dd>' + priceText(p) + '</dd><dt>停車</dt><dd>' + esc(p.park) + '</dd>' + (p.transit ? '<dt>大眾運輸</dt><dd>' + esc(p.transit) + '</dd>' : '') + ((p.flags || []).length ? '<dt>注意</dt><dd>' + p.flags.map(esc).join('、') + '</dd>' : '') + '<dt>資料</dt><dd class="meta">' + esc(p.source) + '，' + md(p.checked) + '</dd></dl>' +
+      '<div class="body"><dl class="kv"><dt>推</dt><dd>' + esc(p.pros) + '</dd><dt>雷</dt><dd>' + esc(p.cons) + '</dd><dt>週一</dt><dd>' + hoursText(p, 0) + '</dd><dt>週日</dt><dd>' + hoursText(p, 6) + '</dd><dt>花費</dt><dd>' + priceText(p) + '</dd>' + (p.pr ? '<dt>公關</dt><dd>' + esc(p.prFee || '有公關，費用先問清楚') + '</dd>' : '') + '<dt>停車</dt><dd>' + esc(p.park) + '</dd>' + (p.transit ? '<dt>大眾運輸</dt><dd>' + esc(p.transit) + '</dd>' : '') + ((p.flags || []).length ? '<dt>注意</dt><dd>' + p.flags.map(esc).join('、') + '</dd>' : '') + '<dt>資料</dt><dd class="meta">' + esc(p.source) + '，' + md(p.checked) + '</dd></dl>' +
       '<div class="acts"><button class="btn small" data-mk="me" aria-pressed="' + !!m.me + '">我想去</button><button class="btn small" data-mk="cm" aria-pressed="' + !!m.cm + '">草莓想去</button><button class="btn small" data-mk="been" aria-pressed="' + !!m.been + '">去過</button><button class="btn small" data-mk="no" aria-pressed="' + !!m.no + '">不想去</button></div>' + bookingHtml(p) + '</div></details>';
   }).join('') + (list.length > renderLimit ? '<button class="btn" id="more" style="width:100%">再顯示 60 個</button>' : '');
   el.querySelectorAll('details').forEach(d => d.addEventListener('toggle', () => d.open ? openSet.add(d.dataset.id) : openSet.delete(d.dataset.id)));
