@@ -1,0 +1,9 @@
+{
+  "name": "週一去哪",
+  "short_name": "週一去哪",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#ffffff",
+  "icons": [{"src": "icon.png", "sizes": "180x180", "type": "image/png"}]
+}

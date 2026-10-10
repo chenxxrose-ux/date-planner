@@ -5,6 +5,7 @@
 <meta name="apple-mobile-web-app-title" content="週一去哪">
 <meta name="theme-color" content="#ffffff">
 <link rel="apple-touch-icon" href="icon.png">
+<link rel="manifest" href="manifest.webmanifest">
 <style>:root{padding-top:env(safe-area-inset-top,0px)}[hidden]{display:none!important}img{max-width:100%}</style>
 </head><body>
 <title>週一去哪</title>
@@ -132,6 +133,9 @@ input[type=date]::-webkit-date-and-time-value{text-align:left;margin:0}
 .cb{flex:1;min-width:90px;background:var(--sunk);border-radius:10px;padding:6px 10px;display:flex;justify-content:space-between;gap:6px;font-size:12.5px;color:var(--muted)}
 .cb b{color:var(--ink);font-variant-numeric:tabular-nums}
 .costparts{margin:6px 0 4px;padding-left:18px;font-size:12px;color:var(--muted)}
+.steps{padding-left:20px;margin:8px 0 0;display:grid;gap:8px;font-size:14px}
+.steps a,.panel a{color:var(--accent-text)}
+.ok{color:#2e7d4f}
 .dayhead{font-family:var(--serif);font-weight:700;font-size:15px;color:var(--accent-text);margin:16px 0 4px;padding-bottom:4px;border-bottom:1px solid var(--line)}
 .card.move{background:var(--accent-soft);border-color:transparent}
 .more{margin-top:12px;padding:12px;border-radius:14px;background:var(--accent-soft);font-size:14px}
@@ -139,7 +143,7 @@ input[type=date]::-webkit-date-and-time-value{text-align:left;margin:0}
 .xbtn{border:0;background:none;color:var(--muted);font-size:18px;cursor:pointer;padding:0}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
 nav.tabbar{position:fixed;left:0;right:0;bottom:0;z-index:20;background:var(--paper);border-top:1px solid var(--line);padding:8px 10px calc(8px + env(safe-area-inset-bottom,0px))}
-nav.tabbar .in{max-width:540px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr);gap:4px}
+nav.tabbar .in{max-width:540px;margin:0 auto;display:grid;grid-template-columns:repeat(5,1fr);gap:2px}
 nav.tabbar button{border:0;background:none;border-radius:12px;padding:6px 0;font:12px var(--sans);color:var(--muted);cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px}
 nav.tabbar button svg{width:22px;height:22px}
 nav.tabbar button[aria-selected="true"]{background:var(--sage);color:var(--ink);font-weight:700}
@@ -294,6 +298,40 @@ button:focus-visible,select:focus-visible,input:focus-visible,summary:focus-visi
   <input type="file" id="impIn" accept="application/json,.json" class="sr">
   <p class="hint" id="bkMsg"></p>
 </section>
+<!-- 更多 -->
+<section id="tab-more" hidden>
+  <h3 class="h3" style="margin-top:8px">自動更新</h3>
+  <p class="hint">這些都在 GitHub 上自動跑，不會用到 Claude，也不用開電腦。</p>
+  <div class="list" id="autoList"></div>
+  <h3 class="h3">設定每月自動找新店</h3>
+  <div class="panel">
+    <p style="margin:0;font-size:14px">每月 1 號會用 Google 地圖找評價好的新店。要先申請一把 Google 地圖金鑰（只要做一次）：</p>
+    <ol class="steps">
+      <li>用電腦打開 <a href="https://console.cloud.google.com/google/maps-apis/start" target="_blank" rel="noopener">Google Maps Platform</a>，用 Google 帳號登入，照指示建立專案、綁信用卡（新帳號有免費額度，每月找一次新店約查 22 次，遠低於免費上限）。</li>
+      <li>在「API 和服務」→「程式庫」搜尋 <b>Places API (New)</b>，按「啟用」。</li>
+      <li>到「憑證」→「建立憑證」→「API 金鑰」，複製那串金鑰。建議按「編輯 API 金鑰」→「API 限制」只勾 Places API (New)。</li>
+      <li>保險起見到「帳單」→「預算與快訊」設一個 100 元的預算提醒。</li>
+      <li>打開 <a href="https://github.com/chenxxrose-ux/date-planner/settings/secrets/actions/new" target="_blank" rel="noopener">GitHub 金鑰設定頁</a>，Name 填 <b style="user-select:all">GOOGLE_MAPS_KEY</b>，Secret 貼上金鑰，按 Add secret。</li>
+      <li>想馬上試：打開 <a href="https://github.com/chenxxrose-ux/date-planner/actions/workflows/monthly.yml" target="_blank" rel="noopener">每月找新店</a> →「Run workflow」。約 1 分鐘後回來重新整理，上面的狀態就會更新。</li>
+    </ol>
+  </div>
+  <h3 class="h3">手動更新</h3>
+  <div class="row">
+    <a class="btn" target="_blank" rel="noopener" href="https://github.com/chenxxrose-ux/date-planner/actions/workflows/weekly.yml">更新油價、電影</a>
+    <a class="btn" target="_blank" rel="noopener" href="https://github.com/chenxxrose-ux/date-planner/actions/workflows/monthly.yml">找新店</a>
+  </div>
+  <p class="hint">打開後按「Run workflow」→ 綠色的「Run workflow」。</p>
+  <h3 class="h3">加到 iPhone 主畫面</h3>
+  <p class="hint" style="font-size:14px">用 Safari 打開這個網站 → 下方「分享」→「加入主畫面」。之後點圖示就像 App 一樣全螢幕打開。</p>
+  <h3 class="h3">資料來源</h3>
+  <ul class="costparts" style="font-size:13px">
+    <li>地點、星等、營業時間：Google 地圖評論</li>
+    <li>電影評分：LINE TODAY 觀眾評分（每週五更新）</li>
+    <li>油價：台灣中油 95 無鉛（每週五更新）</li>
+    <li>台鐵：2025/6/23 新票價；高鐵：現行標準車廂對號座；轉乘段和客運是估算</li>
+    <li>你們的帳本、標記、約會紀錄只存在這支手機（記得到帳本頁匯出備份）</li>
+  </ul>
+</section>
 </div>
 
 <nav class="tabbar" role="tablist" aria-label="分頁"><div class="in">
@@ -301,6 +339,7 @@ button:focus-visible,select:focus-visible,input:focus-visible,summary:focus-visi
   <button role="tab" data-tab="places" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>地點</button>
   <button role="tab" data-tab="movies" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 9h18M8 5v4M16 5v4"/></svg>電影</button>
   <button role="tab" data-tab="ledger" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="6" width="18" height="13" rx="2"/><path d="M3 10h18M16 15h2"/></svg>帳本</button>
+  <button role="tab" data-tab="more" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/></svg>更多</button>
 </div></nav>
 
 <script>
@@ -509,7 +548,8 @@ syncControls();
 /* ---------- 分頁 ---------- */
 $$('nav.tabbar button').forEach(b => b.addEventListener('click', () => {
   $$('nav.tabbar button').forEach(x => x.setAttribute('aria-selected', String(x === b)));
-  ['plan','places','movies','ledger'].forEach(t => $('#tab-' + t).hidden = t !== b.dataset.tab);
+  ['plan','places','movies','ledger','more'].forEach(t => $('#tab-' + t).hidden = t !== b.dataset.tab);
+  if (b.dataset.tab === 'more') renderMore();
   window.scrollTo({top:0});
 }));
 
@@ -964,6 +1004,16 @@ function renderMovies() {
   $('#clist').innerHTML = places.filter(p => p.cat === 'cinema').map(p => '<div class="card"><div class="top2"><div class="name" style="font-size:15px">' + esc(p.name) + '</div><div>' + stars(p.rating) + '</div></div><div class="meta">' + esc(p.area) + '・' + esc(p.pros) + '</div><div class="meta">停車：' + esc(p.park) + (p.transit ? '・' + esc(p.transit) : '') + '</div><div class="acts"><a class="btn small" target="_blank" rel="noopener" href="' + mapsLink(p) + '">Google 地圖</a></div></div>').join('');
 }
 
+/* ---------- 更多：自動更新狀態 ---------- */
+function renderMore() {
+  const a = meta.auto || {}, row = (k, label, when) => {
+    const x = a[k];
+    return '<div class="card"><div class="top2"><div class="name" style="font-size:15px">' + label + '</div><span class="meta">' + when + '</span></div>' +
+      (x ? '<div class="meta"><b class="' + (x.ok ? 'ok' : '') + '" style="' + (x.ok ? '' : 'color:var(--bad)') + '">' + (x.ok ? '正常' : '要處理') + '</b>・' + esc(x.at) + '<br>' + esc(x.msg) + '</div>' : '<div class="meta">還沒跑過</div>') + '</div>';
+  };
+  $('#autoList').innerHTML = row('fuel', '油價', '每週五') + row('movies', '電影評分', '每週五') + row('places', '找新店', '每月 1 號');
+}
+
 /* ---------- 帳本：拍收據 ---------- */
 let draft = null;
 function handleFile(inp) {
@@ -1136,7 +1186,7 @@ function importFromShortcut() {
   draft = {title: String(r.title || items.map(x => x.name).slice(0, 2).join('、') || '一筆花費'), store: String(r.store || '未知'), storeGuessed: !!r.storeGuessed,
     date: /^\d{4}-\d{2}-\d{2}$/.test(r.date || '') ? r.date : ymd(new Date()), payment: String(r.payment || ''), items, total: Math.round(+r.total || items.reduce((s, x) => s + x.amount, 0)), source: '拍收據'};
   $$('nav.tabbar button').forEach(x => x.setAttribute('aria-selected', String(x.dataset.tab === 'ledger')));
-  ['plan','places','movies','ledger'].forEach(t => $('#tab-' + t).hidden = t !== 'ledger');
+  ['plan','places','movies','ledger','more'].forEach(t => $('#tab-' + t).hidden = t !== 'ledger');
   renderDraft();
 }
 

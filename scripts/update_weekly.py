@@ -42,7 +42,21 @@ def movies():
         try: h = get(url)
         except Exception as e: debug.append(url + ' ' + str(e)); continue
         debug.append(url + ' len=' + str(len(h)))
-        # 1) 找頁面內嵌的 JSON 物件：有 title 和 score/rating 的
+        # 1) 頁面內嵌的排行 JSON（items 陣列，每部有 movieId、rating.average、releaseDate、genres、runtime）
+        try:
+            idx = h.find('"movieId"')
+            st = h.rfind('"items":[', 0, idx) + len('"items":')
+            arr, _ = json.JSONDecoder().raw_decode(h, st)
+            for it in arr:
+                rt = it.get('rating') or {}
+                if not it.get('title') or not rt.get('average'): continue
+                rel = ''
+                if it.get('releaseDate'): rel = datetime.datetime.utcfromtimestamp(int(it['releaseDate']) / 1000 + 8 * 3600).strftime('%Y-%m-%d')
+                found.setdefault(it['title'].strip(), {'score': round(float(rt['average']), 1), 'count': rt.get('count'), 'release': rel,
+                    'runtime': it.get('runtime'), 'genre': '、'.join(it.get('genres') or []), 'eng': it.get('engTitle', '')})
+        except Exception as e:
+            debug.append('json ' + str(e)[:80])
+        if found: continue
         for m in re.finditer(r'\{[^{}]*?"title"\s*:\s*"([^"]{1,60})"[^{}]*?\}', h):
             blob = m.group(0)
             sc = re.search(r'"(?:score|rating|avgScore|averageScore|userScore)"\s*:\s*"?([0-9]+(?:\.[0-9]+)?)', blob)
@@ -88,16 +102,19 @@ def main():
         for title, x in found.items():
             r5 = round(x['score'] / 2, 1)
             verdict = '觀眾評分很高' if x['score'] >= 8.8 else '評價不錯' if x['score'] >= 8 else '普通' if x['score'] >= 7 else '評價偏低'
+            if x.get('count') is not None and x['count'] < 10: continue   # 評分人數太少先不算
             rel = x['release']
             if rel and rel.isdigit(): rel = datetime.datetime.utcfromtimestamp(int(rel[:10]) + 8 * 3600).strftime('%Y-%m-%d')
             rel = rel.replace('/', '-')
             k = byTitle.get(title)
             if k:
-                mv[k].update({'rating': r5, 'ratingSrc': 'LINE TODAY 觀眾評分 %.1f/10' % x['score'], 'verdict': verdict, 'checked': today})
+                if x.get('genre') and not mv[k].get('genre'): mv[k]['genre'] = x['genre']
+                if x.get('runtime') and not mv[k].get('runtime'): mv[k]['runtime'] = x['runtime']
+                mv[k].update({'rating': r5, 'ratingSrc': 'LINE TODAY 觀眾評分 %.1f/10' % x['score'] + ('（%d 人）' % x['count'] if x.get('count') else ''), 'verdict': verdict, 'checked': today})
                 if rel and not mv[k].get('release'): mv[k]['release'] = rel
             else:
                 n_new += 1; k = 'a' + TODAY.strftime('%y%m%d') + str(n_new)
-                mv[k] = {'title': title, 'release': rel, 'genre': '', 'runtime': x['runtime'], 'rating': r5, 'ratingSrc': 'LINE TODAY 觀眾評分 %.1f/10' % x['score'], 'summary': '', 'verdict': verdict, 'checked': today}
+                mv[k] = {'title': title, 'release': rel, 'genre': x.get('genre', ''), 'runtime': x['runtime'], 'rating': r5, 'ratingSrc': 'LINE TODAY 觀眾評分 %.1f/10' % x['score'] + ('（%d 人）' % x['count'] if x.get('count') else ''), 'summary': '', 'verdict': verdict, 'checked': today}
         # 上映超過 8 週、這次又沒出現在排行的，當作下檔
         cut = (TODAY - datetime.timedelta(days=56)).strftime('%Y-%m-%d')
         for k in [k for k, v in mv.items() if v['title'] not in found and v.get('release') and v['release'] < cut]: mv.pop(k)
