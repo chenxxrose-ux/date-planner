@@ -1,0 +1,968 @@
+<!doctype html>
+<html lang="zh-Hant"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="週一去哪">
+<meta name="theme-color" content="#f5f1e9">
+<link rel="apple-touch-icon" href="icon.png">
+<style>:root{padding-top:env(safe-area-inset-top,0px)}[hidden]{display:none!important}img{max-width:100%}</style>
+</head><body>
+<title>週一去哪</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@600;700&family=Noto+Sans+TC:wght@400;500;700&display=swap">
+<style>
+/* 手機單欄＋底部分頁列。奶茶紙色底、墨綠字、焦糖橘重點色（沿用你們喜歡的那版配色） */
+:root{
+  --bg:#f5f1e9; --paper:#fffdf8; --sunk:#edece3; --ink:#233c33; --muted:#6f786f; --line:#e6e3d8;
+  --accent:#c2703f; --accent-ink:#ffffff; --accent-soft:#f6e6da; --accent-text:#93512a;
+  --sage:#dce6db; --sage-text:#2f5f45;
+  --warn-soft:#fbefd9; --warn:#8a5a10; --bad-soft:#fbe4e1; --bad:#a63526;
+  --eat:#e2a77f; --wear:#9d8cc8; --use:#7fa9c0; --fun:#8fbf8a;
+  --star:#d99a1e;
+  --serif:"Noto Serif TC",Georgia,serif;
+  --sans:"Noto Sans TC",-apple-system,"PingFang TC","Heiti TC",sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#141a17; --paper:#1c2420; --sunk:#252e29; --ink:#e7ece6; --muted:#9daa9f; --line:#2f3a34;
+  --accent:#e08a55; --accent-ink:#1b0f07; --accent-soft:#3a281c; --accent-text:#f0b48c;
+  --sage:#25362c; --sage-text:#9fd3b2;
+  --warn-soft:#3a2f17; --warn:#f0c470; --bad-soft:#3d201c; --bad:#ff9a8a;
+  --star:#f2b84b; color-scheme:dark;
+}}
+:root[data-theme="dark"]{
+  --bg:#141a17; --paper:#1c2420; --sunk:#252e29; --ink:#e7ece6; --muted:#9daa9f; --line:#2f3a34;
+  --accent:#e08a55; --accent-ink:#1b0f07; --accent-soft:#3a281c; --accent-text:#f0b48c;
+  --sage:#25362c; --sage-text:#9fd3b2;
+  --warn-soft:#3a2f17; --warn:#f0c470; --bad-soft:#3d201c; --bad:#ff9a8a;
+  --star:#f2b84b; color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:15px/1.6 var(--sans);margin:0}
+.wrap{max-width:540px;margin:0 auto;padding-inline:16px;padding-block:0 110px}
+header.top{padding-block:20px 8px}
+.eyebrow{font-size:11px;letter-spacing:.22em;color:var(--accent-text);font-weight:700}
+h1{font-family:var(--serif);font-size:32px;margin:2px 0 0;line-height:1.2}
+h1 span{color:var(--accent)}
+.sub{color:var(--muted);font-size:13px;margin:2px 0 0}
+section[hidden]{display:none}
+.panel{background:var(--paper);border:1px solid var(--line);border-radius:18px;padding:16px;margin-top:12px}
+.label{font-size:12px;color:var(--muted);margin:14px 0 6px}
+.label:first-child{margin-top:0}
+.seg{display:flex;background:var(--sunk);border-radius:12px;padding:4px;gap:4px}
+.seg button{flex:1;border:0;background:none;padding:9px 4px;border-radius:9px;font:500 14px var(--sans);color:var(--muted);cursor:pointer;min-width:0}
+.seg button[aria-pressed="true"]{background:var(--paper);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.08)}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{border:1px solid var(--line);background:var(--paper);color:var(--ink);border-radius:999px;padding:6px 12px;font:13px var(--sans);cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:var(--paper);font-weight:500}
+.grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.field{display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--muted);min-width:0}
+input,select,textarea{font:15px var(--sans);color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:8px 10px;width:100%;min-width:0}
+.btn{border:1px solid var(--line);background:var(--paper);color:var(--ink);border-radius:12px;padding:10px 14px;font:500 14px var(--sans);cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:6px}
+.btn.primary{background:var(--accent);border-color:transparent;color:var(--accent-ink)}
+.btn.big{width:100%;padding:14px;font-size:17px;font-family:var(--serif);letter-spacing:.04em;margin-top:14px}
+.btn.small{padding:5px 10px;font-size:13px;border-radius:9px}
+.btn[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);border-color:transparent}
+.btn:disabled{opacity:.5}
+.row{display:flex;gap:8px;flex-wrap:wrap}
+.row>.btn{flex:1}
+.hint{font-size:13px;color:var(--muted);margin:8px 0 0}
+.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:14px 0}
+.stat{background:var(--sage);border-radius:14px;padding:10px 6px;text-align:center}
+.stat b{display:block;font-size:17px;font-weight:700;font-variant-numeric:tabular-nums;color:var(--ink)}
+.stat span{font-size:11.5px;color:var(--sage-text)}
+.planhead{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;flex-wrap:wrap;margin-top:22px}
+.planhead h2{font-family:var(--serif);font-size:22px;margin:0}
+.planhead p{margin:0;color:var(--muted);font-size:13px}
+ol.tl{list-style:none;margin:0;padding:0}
+.leg{font-size:12px;color:var(--muted);padding:5px 0 5px 58px;font-variant-numeric:tabular-nums}
+.stop{display:grid;grid-template-columns:50px minmax(0,1fr);gap:8px}
+.tm{font-weight:700;font-size:14px;text-align:right;padding-top:12px;font-variant-numeric:tabular-nums}
+.tm small{display:block;font-size:11px;color:var(--muted);font-weight:400}
+.card{background:var(--paper);border:1px solid var(--line);border-radius:16px;padding:12px 13px;min-width:0}
+.card.locked{border:1.5px solid var(--accent)}
+.card.rest{background:var(--sunk);border-style:dashed}
+.top2{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.role{font-size:12px;color:var(--accent-text);font-weight:700;letter-spacing:.04em}
+.area{font-size:12px;color:var(--muted)}
+.name{font-weight:700;font-size:16px;margin:2px 0;word-break:break-word}
+.meta{font-size:13px;color:var(--muted);line-height:1.6}
+.meta b{color:var(--ink);font-weight:500}
+.stars{color:var(--star);letter-spacing:1px}
+.tags{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px;padding:0;list-style:none}
+.tag{font-size:11.5px;background:var(--sage);color:var(--sage-text);border-radius:6px;padding:1px 7px}
+.tag.w{background:var(--warn-soft);color:var(--warn)}
+.tag.no{background:var(--bad-soft);color:var(--bad)}
+.tag.hi{background:var(--accent-soft);color:var(--accent-text)}
+.acts{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}
+.home{margin-top:12px;padding:10px 12px;border-radius:12px;font-size:13.5px;background:var(--sage);color:var(--sage-text)}
+.home.tight{background:var(--warn-soft);color:var(--warn)}
+.home.late{background:var(--bad-soft);color:var(--bad)}
+.notes{margin-top:8px;padding:10px 12px;border-radius:12px;background:var(--warn-soft);color:var(--warn);font-size:12.5px}
+.notes ul{margin:4px 0 0;padding-left:18px}
+.book{margin-top:8px;padding:10px;border-radius:12px;background:var(--sunk);display:grid;gap:8px;font-size:13px}
+.empty{text-align:center;color:var(--muted);padding:26px 14px;border:1px dashed var(--line);border-radius:16px;font-size:14px;margin-top:14px}
+.empty strong{display:block;color:var(--ink);font-family:var(--serif);font-size:18px;margin-bottom:4px}
+.banner{padding:10px 12px;border-radius:12px;background:var(--warn-soft);color:var(--warn);font-size:13px;margin-top:12px}
+.list{display:grid;gap:8px;margin-top:12px}
+details.pl{background:var(--paper);border:1px solid var(--line);border-radius:14px}
+details.pl summary{list-style:none;cursor:pointer;padding:12px;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:center}
+details.pl summary::-webkit-details-marker{display:none}
+details.pl .body{padding:0 12px 12px;display:grid;gap:8px;font-size:13.5px}
+dl.kv{display:grid;grid-template-columns:60px minmax(0,1fr);gap:4px 8px;margin:0}
+dl.kv dt{color:var(--muted)}
+dl.kv dd{margin:0}
+.h3{font-family:var(--serif);font-size:19px;margin:24px 0 4px}
+.bar{display:flex;height:10px;border-radius:5px;overflow:hidden;background:var(--sunk);margin-top:8px}
+.legend{display:flex;gap:12px;font-size:12px;color:var(--muted);margin-top:6px;flex-wrap:wrap}
+.dot{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:4px;vertical-align:-1px}
+.k-吃{background:var(--eat)} .k-穿{background:var(--wear)} .k-用{background:var(--use)} .k-玩{background:var(--fun)}
+.kind{font-size:11.5px;border-radius:6px;padding:1px 7px;color:#2a2a2a}
+.item{display:grid;grid-template-columns:62px minmax(0,1fr) 80px 28px;gap:6px;align-items:center;margin-top:6px}
+.item select,.item input{padding:6px 8px;font-size:14px}
+.xbtn{border:0;background:none;color:var(--muted);font-size:18px;cursor:pointer;padding:0}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+nav.tabbar{position:fixed;left:0;right:0;bottom:0;z-index:20;background:var(--paper);border-top:1px solid var(--line);padding:8px 10px calc(8px + env(safe-area-inset-bottom,0px))}
+nav.tabbar .in{max-width:540px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr);gap:4px}
+nav.tabbar button{border:0;background:none;border-radius:12px;padding:6px 0;font:12px var(--sans);color:var(--muted);cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px}
+nav.tabbar button svg{width:22px;height:22px}
+nav.tabbar button[aria-selected="true"]{background:var(--sage);color:var(--ink);font-weight:700}
+button:focus-visible,select:focus-visible,input:focus-visible,summary:focus-visible,a:focus-visible,textarea:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+@media (max-width:360px){.grid3{grid-template-columns:1fr 1fr}}
+</style>
+
+<div class="wrap">
+<header class="top">
+  <div class="eyebrow">OUR LITTLE GETAWAYS</div>
+  <h1>週一去哪<span>.</span></h1>
+  <p class="sub" id="dataline">讀取地點資料中…</p>
+</header>
+<div id="dbBanner" class="banner" hidden></div>
+
+<!-- 排行程 -->
+<section id="tab-plan">
+  <div class="panel">
+    <p class="label">什麼時候</p>
+    <div class="seg" id="mode"><button data-v="sun" aria-pressed="false">週日夜</button><button data-v="mon" aria-pressed="true">週一白天</button><button data-v="trip" aria-pressed="false">過夜</button></div>
+    <div id="tripBox" hidden>
+      <p class="label">過夜去哪</p>
+      <div class="seg" id="tripRegion"><button data-v="tn" aria-pressed="true">台南</button><button data-v="pts" aria-pressed="false">屏東市</button><button data-v="kt" aria-pressed="false">恆春墾丁</button></div>
+    </div>
+    <p class="label">今天的電量</p>
+    <div class="seg" id="energy"><button data-v="tired" aria-pressed="false">很累</button><button data-v="normal" aria-pressed="true">普通</button><button data-v="high" aria-pressed="false">精力充沛</button></div>
+    <p class="label">交通</p>
+    <div class="seg" id="transport"><button data-v="scooter" aria-pressed="true">騎車</button><button data-v="car" aria-pressed="false">開車</button><button data-v="transit" aria-pressed="false">大眾運輸</button></div>
+    <p class="label">想加的行程（可多選）</p>
+    <div class="chips" id="fun">
+      <button class="chip" data-v="fine" aria-pressed="false">高級餐廳</button>
+      <button class="chip" data-v="nightview" aria-pressed="false">高級夜景</button>
+      <button class="chip" data-v="snack" aria-pressed="false">平價小吃</button>
+      <button class="chip" data-v="bbq" aria-pressed="false">燒肉</button>
+      <button class="chip" data-v="hotpot" aria-pressed="false">火鍋</button>
+      <button class="chip" data-v="massage" aria-pressed="false">按摩</button>
+      <button class="chip" data-v="hairspa" aria-pressed="false">越式洗髮</button>
+      <button class="chip" data-v="izakaya" aria-pressed="false">居酒屋</button>
+      <button class="chip" data-v="bar" aria-pressed="false">酒吧</button>
+      <button class="chip" data-v="ktv" aria-pressed="false">唱歌</button>
+      <button class="chip" data-v="cinema" aria-pressed="false">看電影</button>
+    </div>
+    <p class="label">條件</p>
+    <div class="chips" id="filters">
+      <button class="chip" data-v="near" aria-pressed="false">每段 30 分鐘內</button>
+      <button class="chip" data-v="indoor" aria-pressed="false">室內吹冷氣</button>
+      <button class="chip" data-v="noqueue" aria-pressed="false">不想排隊</button>
+      <button class="chip" data-v="rain" aria-pressed="false">下雨備案</button>
+      <button class="chip" data-v="sing" aria-pressed="false">要能唱歌</button>
+    </div>
+    <label class="field" style="margin-top:14px">兩人預算（元）<input id="budget" type="number" inputmode="numeric" min="0" step="100"></label>
+    <div class="grid2" style="margin-top:8px">
+      <label class="field">出發<input id="startTime" type="time"></label>
+      <label class="field">最晚到家<input id="homeTime" type="time"></label>
+    </div>
+    <button class="btn primary big" id="goNow">現在出發，幫我排</button>
+    <button class="btn" id="goNext" style="width:100%;margin-top:8px">照上面的時間排</button>
+    <p class="hint" id="goHint">「現在出發」用現在的時間；不在休假時段就排下一次。</p>
+  </div>
+  <div id="planOut"><div class="empty"><strong>按「現在出發」抽一套行程</strong>會排好吃、逛、甜點的順序，算好每站幾點到、最晚幾點要離開。</div></div>
+</section>
+
+<!-- 地點 -->
+<section id="tab-places" hidden>
+  <div class="panel">
+    <input type="search" id="q" placeholder="搜尋店名或地區，例如 鳳山" aria-label="搜尋地點">
+    <div class="grid2" style="margin-top:8px">
+      <select id="fRegion" aria-label="地區"><option value="">全部地區</option><option value="ks">高雄</option><option value="tn">台南</option><option value="pts">屏東市</option><option value="kt">恆春墾丁</option></select>
+      <select id="fCat" aria-label="類型"><option value="">全部類型</option></select>
+    </div>
+    <div class="chips" id="fStatus" style="margin-top:8px">
+      <button class="chip" data-v="" aria-pressed="true">全部</button>
+      <button class="chip" data-v="fav" aria-pressed="false">常去</button>
+      <button class="chip" data-v="both" aria-pressed="false">兩個都想去</button>
+      <button class="chip" data-v="want" aria-pressed="false">有人想去</button>
+      <button class="chip" data-v="been" aria-pressed="false">去過</button>
+      <button class="chip" data-v="sing" aria-pressed="false">可以唱歌</button>
+      <button class="chip" data-v="new" aria-pressed="false">新店</button>
+      <button class="chip" data-v="no" aria-pressed="false">不想去</button>
+    </div>
+    <button class="btn" id="addPlaceBtn" style="width:100%;margin-top:10px">＋ 自己新增店家</button>
+    <form id="addPlace" hidden style="margin-top:10px;display:grid;gap:8px">
+      <label class="field">店名<input id="apName" required maxlength="60" placeholder="例如：阿婆冰"></label>
+      <div class="grid2">
+        <label class="field">類型<select id="apCat"></select></label>
+        <label class="field">地區<select id="apArea"></select></label>
+      </div>
+      <div class="grid2">
+        <label class="field">一人大約（元）<input id="apPrice" type="number" inputmode="numeric" min="0" value="300"></label>
+        <label class="field">待多久（分鐘）<input id="apStay" type="number" inputmode="numeric" min="10" value="60"></label>
+      </div>
+      <label class="field">備註<input id="apNote" maxlength="120" placeholder="例如：草莓想吃、要預約"></label>
+      <p class="hint" style="margin:0">營業時間先當作 11:00–22:00，出發前記得確認。</p>
+      <div class="row"><button type="button" class="btn" id="apCancel">取消</button><button class="btn primary">新增</button></div>
+      <p class="hint" id="apMsg" style="margin:0"></p>
+    </form>
+  </div>
+  <div class="list" id="plist"><div class="empty"><strong>地點載入中</strong>資料讀到後會出現在這裡。</div></div>
+</section>
+
+<!-- 電影 -->
+<section id="tab-movies" hidden>
+  <p class="hint">最近上映的電影和評價，每週自動更新。場次請點按鈕到影城確認。</p>
+  <div class="list" id="mlist"><div class="empty"><strong>電影清單準備中</strong>更新後會出現在這裡。</div></div>
+  <h3 class="h3">高雄的電影院</h3>
+  <div class="list" id="clist"></div>
+</section>
+
+<!-- 帳本 -->
+<section id="tab-ledger" hidden>
+  <div class="stats" id="ledgerStats"></div>
+  <div class="bar" id="kindBar"></div>
+  <div class="legend" id="kindLegend"></div>
+  <div class="grid2" style="margin-top:14px">
+    <a class="btn primary" id="scBtn" href="shortcuts://run-shortcut?name=%E6%8B%8D%E6%94%B6%E6%93%9A%E8%A8%98%E5%B8%B3">拍收據（捷徑）</a>
+    <button class="btn" id="manualBtn">手動記</button>
+  </div>
+  <p class="hint" id="receiptHint">按「拍收據」會打開 iPhone 捷徑，用 ChatGPT 讀完收據後自動回到這裡，確認後存入。第一次用要先照<a href="#setup" id="scHelp">設定說明</a>做好捷徑。</p>
+  <div id="scGuide" class="panel" hidden></div>
+  <div id="receiptBox"></div>
+  <h3 class="h3">最近的花費</h3>
+  <div class="list" id="elist"><div class="empty"><strong>還沒有花費紀錄</strong>拍一張收據，或按「手動記」新增第一筆。</div></div>
+  <h3 class="h3">約會紀錄</h3>
+  <div class="list" id="tlist"><div class="empty"><strong>還沒有約會紀錄</strong>排好行程按「就決定這套」，會記在這裡。</div></div>
+  <h3 class="h3">備份</h3>
+  <p class="hint">帳本、標記、約會紀錄都存在這支手機裡。換手機前先匯出，到新手機再匯入。</p>
+  <div class="grid2" style="margin-top:8px"><button class="btn" id="expBtn">匯出備份</button><label class="btn" for="impIn">匯入備份</label></div>
+  <input type="file" id="impIn" accept="application/json,.json" class="sr">
+  <p class="hint" id="bkMsg"></p>
+</section>
+</div>
+
+<nav class="tabbar" role="tablist" aria-label="分頁"><div class="in">
+  <button role="tab" data-tab="plan" aria-selected="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/><path d="M19 17l.7 1.8 1.8.7-1.8.7L19 22l-.7-1.8-1.8-.7 1.8-.7z"/></svg>排行程</button>
+  <button role="tab" data-tab="places" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>地點</button>
+  <button role="tab" data-tab="movies" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 9h18M8 5v4M16 5v4"/></svg>電影</button>
+  <button role="tab" data-tab="ledger" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="6" width="18" height="13" rx="2"/><path d="M3 10h18M16 15h2"/></svg>帳本</button>
+</div></nav>
+
+<script>
+(() => {
+'use strict';
+const $ = s => document.querySelector(s);
+const $$ = s => [...document.querySelectorAll(s)];
+const HOME = {lat:22.6005, lng:120.3365};
+const REGION = {ks:'高雄', tn:'台南', pts:'屏東市', kt:'恆春墾丁'};
+const CAT = {eat:'吃飯', fine:'高級餐廳', snack:'平價小吃', bbq:'燒肉', hotpot:'火鍋', dessert:'甜點咖啡', shop:'逛小廢物', mall:'商場', market:'夜市', nightview:'夜景', izakaya:'居酒屋', bar:'酒吧', massage:'按摩', hairspa:'越式洗髮', ktv:'唱歌 KTV', cinema:'電影院'};
+const AREAS = {'鳳山區':[22.627,120.357],'苓雅區':[22.622,120.312],'新興區':[22.631,120.307],'前金區':[22.627,120.294],'前鎮區':[22.596,120.318],'三民區':[22.648,120.315],'鹽埕區':[22.624,120.284],'鼓山區':[22.648,120.278],'左營區':[22.678,120.296],'台南中西區':[22.993,120.200],'屏東市':[22.672,120.488],'恆春墾丁':[21.960,120.760]};
+const HOLIDAYS = {'2026-10-09':'國慶補假','2026-10-10':'國慶日','2026-10-25':'光復節','2026-10-26':'光復節補假','2026-12-25':'行憲紀念日','2027-01-01':'元旦','2027-02-05':'除夕','2027-02-06':'春節','2027-02-07':'春節','2027-02-08':'春節','2027-02-09':'春節補假','2027-02-10':'春節補假','2027-02-28':'和平紀念日','2027-03-01':'和平紀念日補假','2027-04-04':'兒童節','2027-04-05':'清明節','2027-05-01':'勞動節','2027-06-09':'端午節','2027-09-15':'中秋節','2027-09-28':'教師節','2027-10-10':'國慶日','2027-10-11':'國慶補假'};
+const KINDS = ['吃','穿','用','玩'];
+
+let db = null, sample = null, places = [], marks = {}, trips = [], movies = [], expenses = [], meta = {};
+let prefs = {mode:'mon', tripRegion:'tn', energy:'normal', transport:'scooter', filters:[], fun:[], budget:3000, startTime:'11:00', homeTime:'21:40'};
+let plan = null, prefsLoaded = false;
+try { const s = localStorage.getItem('prefs2'); if (s) prefs = Object.assign(prefs, JSON.parse(s)); } catch(e) {}
+
+/* ---------- 工具 ---------- */
+const pad = n => String(n).padStart(2,'0');
+const hm = m => { m = ((Math.round(m) % 1440) + 1440) % 1440; return pad(Math.floor(m/60)) + ':' + pad(m%60); };
+const toMin = s => { const [h, m] = String(s||'0:0').split(':').map(Number); return (h||0)*60 + (m||0); };
+const ymd = d => d.getFullYear() + '-' + pad(d.getMonth()+1) + '-' + pad(d.getDate());
+const md = s => { if (!s) return ''; const [, m, d] = s.split('-'); return (+m) + '/' + (+d); };
+const money = n => Math.round(+n || 0).toLocaleString('zh-TW');
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const byId = id => places.find(p => p.id === id);
+const mk = id => marks[id] || {};
+function km(a, b) {
+  const R = 6371, t = x => x*Math.PI/180, dLat = t(b.lat-a.lat), dLng = t(b.lng-a.lng);
+  const h = Math.sin(dLat/2)**2 + Math.cos(t(a.lat))*Math.cos(t(b.lat))*Math.sin(dLng/2)**2;
+  return 2*R*Math.asin(Math.sqrt(h));
+}
+function travel(a, b, mode) { // 分鐘，含找停車，估算
+  const d = km(a, b) * 1.3; let m;
+  if (mode === 'car') m = d < 20 ? d/26*60 : 15 + d/70*60;
+  else if (mode === 'transit') m = d < 25 ? 15 + d/18*60 : 45 + d/55*60;
+  else m = d < 20 ? d/28*60 : 10 + d/45*60;
+  let park = mode === 'scooter' ? 5 : mode === 'car' ? ((b.park && /難|不便/.test(b.park)) ? 20 : 10) : 0;
+  return Math.max(5, Math.ceil((m + park) / 5) * 5);
+}
+function openSpan(p, day, t, stay) { // day 0=週一…6=週日，t 從該日 0:00 起算，可超過 1440
+  if (!p.hours) return false;
+  const ok = (d, s, e) => (p.hours[d] || []).some(([a, b]) => s >= a && e <= b);
+  const s = t, e = t + stay;
+  if (ok(day, s, e)) return true;
+  if (s >= 1440 && ok((day+1)%7, s-1440, e-1440)) return true;
+  return ok((day+6)%7, s+1440, e+1440);
+}
+function hoursText(p, day) {
+  const r = p.hours?.[day];
+  if (!r) return '未確認';
+  if (!r.length) return '公休';
+  return r.map(([a, b]) => (a === 0 && b === 1440) ? '24 小時' : hm(a) + '–' + (b > 1440 ? '翌日 ' : '') + hm(b)).join('、');
+}
+function openAt(p, day, t, stay, maxWait) { // 最早可以進去的時間（可等開門），等太久回傳 null
+  for (let w = 0; w <= maxWait; w += 10) if (openSpan(p, day, t + w, stay)) return t + w;
+  return null;
+}
+const EVENING = new Set(['fine','bbq','hotpot','izakaya','bar','nightview','eat2']);
+const WAIT = {izakaya:600, bar:600, eat2:300, night:30, ktv:60, cinema:120, massage:60, hairspa:60, fine:420, bbq:300, hotpot:300, nightview:480};
+const trust = p => { const C = 120, m = 4.2, n = p.reviews || 0; return (C*m + n*((p.rating || m) - (p.suspect ? 0.4 : 0))) / (C + n); };
+const isNew = p => p.isNew || (p.reviews || 0) < 80;
+const negative = p => /負評|兩極|很差/.test(p.cons || '');
+const stars = r => r ? '<span class="stars" aria-label="' + r + ' 顆星">' + '★'.repeat(Math.round(r)) + '☆'.repeat(5 - Math.round(r)) + '</span>' : '';
+const wishText = m => m.me && m.cm ? '兩個都想去' : m.me ? '我想去' : m.cm ? '草莓想去' : '';
+const priceText = p => { const r = p.priceRange; return r ? '一人約 ' + money(r[1]) + '–' + money(r[2]) + ' 元（估）' : '一人約 ' + money(p.price) + ' 元（估）'; };
+const daysSince = s => s ? (Date.now() - new Date(s + 'T00:00:00').getTime()) / 864e5 : Infinity;
+const mapsLink = p => 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(p.name) + (p.placeId ? '&query_place_id=' + p.placeId : '');
+const dirLink = (p, mode) => 'https://www.google.com/maps/dir/?api=1&destination=' + encodeURIComponent(p.name) + (p.placeId ? '&destination_place_id=' + p.placeId : '') + '&travelmode=' + ({scooter:'two-wheeler', car:'driving', transit:'transit'}[mode] || 'driving');
+function showBanner(t) { const b = $('#dbBanner'); b.textContent = t; b.hidden = false; }
+async function copyText(t, btn) {
+  try { await navigator.clipboard.writeText(t); btn.textContent = '已複製'; }
+  catch(e) { btn.textContent = t; }
+  setTimeout(() => { btn.textContent = '複製電話'; }, 1800);
+}
+
+/* ---------- 偏好 ---------- */
+function savePrefs() {
+  try { localStorage.setItem('prefs2', JSON.stringify(prefs)); } catch(e) {}
+  if (db && prefsLoaded) { clearTimeout(savePrefs.t); savePrefs.t = setTimeout(() => db.doc('prefs/main').set(prefs).catch(() => {}), 800); }
+}
+function syncControls() {
+  const seg = (id, v) => $$('#' + id + ' button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.v === v)));
+  seg('mode', prefs.mode); seg('tripRegion', prefs.tripRegion); seg('energy', prefs.energy); seg('transport', prefs.transport);
+  $$('#fun button').forEach(b => b.setAttribute('aria-pressed', String(prefs.fun.includes(b.dataset.v))));
+  $$('#filters button').forEach(b => b.setAttribute('aria-pressed', String(prefs.filters.includes(b.dataset.v))));
+  $('#tripBox').hidden = prefs.mode !== 'trip';
+  $('#budget').value = prefs.budget; $('#startTime').value = prefs.startTime; $('#homeTime').value = prefs.homeTime;
+}
+['mode','tripRegion','energy','transport'].forEach(id => $$('#' + id + ' button').forEach(b => b.addEventListener('click', () => {
+  prefs[id] = b.dataset.v;
+  if (id === 'mode') prefs.startTime = b.dataset.v === 'mon' ? '11:00' : '22:00';
+  syncControls(); savePrefs();
+})));
+['fun','filters'].forEach(id => $$('#' + id + ' button').forEach(b => b.addEventListener('click', () => {
+  const s = new Set(prefs[id]); s.has(b.dataset.v) ? s.delete(b.dataset.v) : s.add(b.dataset.v);
+  prefs[id] = [...s]; syncControls(); savePrefs();
+})));
+[['budget','budget'],['startTime','startTime'],['homeTime','homeTime']].forEach(([id, k]) => $('#' + id).addEventListener('change', e => {
+  prefs[k] = k === 'budget' ? Math.max(0, +e.target.value || 0) : e.target.value; savePrefs();
+}));
+syncControls();
+
+/* ---------- 分頁 ---------- */
+$$('nav.tabbar button').forEach(b => b.addEventListener('click', () => {
+  $$('nav.tabbar button').forEach(x => x.setAttribute('aria-selected', String(x === b)));
+  ['plan','places','movies','ledger'].forEach(t => $('#tab-' + t).hidden = t !== b.dataset.tab);
+  window.scrollTo({top:0});
+}));
+
+/* ---------- 排行程 ---------- */
+const ROLES = {
+  eat:{label:'吃飯', cats:['eat','snack']}, eat2:{label:'晚餐', cats:['eat','market','izakaya','bbq','hotpot']}, sweet:{label:'甜點', cats:['dessert']},
+  shop:{label:'逛小廢物', cats:['shop','mall']}, shopview:{label:'逛逛', cats:['shop','mall','nightview','market']},
+  fine:{label:'高級餐廳', cats:['fine']}, nightview:{label:'看夜景', cats:['nightview']}, snack:{label:'平價小吃', cats:['snack']}, bbq:{label:'燒肉', cats:['bbq']}, hotpot:{label:'火鍋', cats:['hotpot']},
+  night:{label:'宵夜', cats:['eat','market','izakaya','snack','hotpot','bbq']},
+  massage:{label:'按摩', cats:['massage']}, hairspa:{label:'越式洗髮', cats:['hairspa']}, izakaya:{label:'居酒屋', cats:['izakaya']},
+  bar:{label:'酒吧', cats:['bar']}, ktv:{label:'唱歌', cats:['ktv','bar']}, cinema:{label:'看電影', cats:['cinema']}
+};
+const STAY_SCALE = {tired:0.85, normal:1, high:1};
+const CAP = {tired:20, normal:35, high:60};
+function rolesFor(mode, energy, fun) {
+  let r;
+  if (mode === 'sun') {
+    r = (energy === 'high' || (!fun.length && energy !== 'tired')) ? ['shopview'] : [];
+    if (!fun.includes('izakaya') && !(fun.length && energy === 'tired')) r.unshift('night');
+  } else r = energy === 'tired' ? ['eat','sweet'] : energy === 'high' ? ['eat','shop','sweet','eat2'] : ['eat','shop','sweet'];
+  const MEAL = ['fine','bbq','hotpot','snack'];
+  fun.forEach(f => {
+    if (mode === 'sun') { if (MEAL.includes(f) && r[0] === 'night') r[0] = f; else r.push(f); return; }
+    if (MEAL.includes(f)) { const i = r.indexOf('eat'); if (i >= 0 && f === 'snack') r[i] = f; else if (r.includes('eat2')) r[r.indexOf('eat2')] = f; else r.push(f); return; }
+    if (f === 'izakaya' || f === 'bar' || f === 'nightview') r.push(f); else r.splice(Math.min(2, r.length), 0, f);
+  });
+  if (mode !== 'sun' && fun.includes('izakaya')) r = r.filter(x => x !== 'eat2');
+  if (!r.length) r = ['night'];
+  return r;
+}
+function nextDates(now) {
+  const sun = new Date(now); sun.setDate(now.getDate() + ((7 - now.getDay()) % 7));
+  const mon = new Date(sun); mon.setDate(sun.getDate() + 1);
+  return {sun, mon};
+}
+function buildCtx(live) {
+  const now = new Date(), dow = now.getDay(), mins = now.getHours()*60 + now.getMinutes();
+  let {sun, mon} = nextDates(now), mode = prefs.mode, note = '', start = toMin(prefs.startTime);
+  if (live) {
+    if (dow === 0 && mins >= 21*60) { if (mode !== 'trip') mode = 'sun'; start = Math.max(mins + 10, 22*60); }
+    else if (dow === 1 && mins < 4*60) { mode = 'sun'; start = 1440 + mins + 10; sun = new Date(now); sun.setDate(now.getDate()-1); mon = new Date(now); }
+    else if (dow === 1 && mins < 20*60) { mode = 'mon'; start = Math.ceil((mins + 10)/10)*10; mon = new Date(now); sun = new Date(now); sun.setDate(now.getDate()-1); }
+    else { note = '現在不是你們的休假時段，先排下一次休假。'; live = false; }
+  }
+  if (!live) start = toMin(prefs.startTime) || (mode === 'mon' ? 660 : 1320);
+  if (mode !== 'mon' && start < 12*60) start += 1440; // 週日夜跨過午夜
+  let homeBy = toMin(prefs.homeTime) || 1300;
+  if (homeBy <= start % 1440 || (mode !== 'mon' && homeBy < 12*60)) homeBy += 1440; // 比出發早，當作隔天凌晨
+  if (homeBy - start < 90) { note = (note ? note + ' ' : '') + '「最晚到家」離出發太近，先用預設時間排。'; homeBy = mode === 'mon' ? 1300 : 26*60; }
+  return {mode, start, live, note, energy:prefs.energy, transport:prefs.transport, filters:[...prefs.filters], fun:[...prefs.fun],
+    region: mode === 'trip' ? prefs.tripRegion : 'ks', budget: +prefs.budget || 0,
+    homeBy, sunHomeBy: 26*60, sunDate: ymd(sun), monDate: ymd(mon)};
+}
+function candidates(role, ctx, region) {
+  const f = new Set(ctx.filters), cats = ROLES[role].cats;
+  return places.filter(p => cats.includes(p.cat) && p.region === region && !mk(p.id).no && p.lat != null
+    && !(f.has('noqueue') && p.queue) && !((f.has('indoor') || f.has('rain')) && !p.indoor)
+    && !(role === 'ktv' && p.cat === 'bar' && !p.karaoke));
+}
+function weight(p, ctx) {
+  const m = mk(p.id); let w = Math.exp((trust(p) - 4.2) * 3);
+  if (p.favorite) w *= 4;
+  if (m.me && m.cm) w *= 3; else if (m.me || m.cm) w *= 1.8;
+  const ds = daysSince(m.been); if (ds < 30) w *= 0.25; else if (ds < 120) w *= 0.6;
+  if (isNew(p) && !m.been) w *= 1.3;
+  if (negative(p)) w *= 0.7;
+  if (ctx.filters.includes('sing') && p.karaoke) w *= 5;
+  return w;
+}
+function pick(list) {
+  const tot = list.reduce((s, x) => s + x.w, 0); if (!tot) return null;
+  let r = Math.random() * tot; for (const x of list) { r -= x.w; if (r <= 0) return x; }
+  return list[list.length-1];
+}
+function chooseStop(role, ctx, from, t, day, region, exclude) {
+  const cap = ctx.filters.includes('near') ? 30 : ctx.mode === 'trip' ? 45 : CAP[ctx.energy];
+  const explore = Math.random() < 0.2, list = [];
+  for (const p of candidates(role, ctx, region)) {
+    if (exclude.has(p.id)) continue;
+    const tv = travel(from, p, ctx.transport); if (tv > cap) continue;
+    const t0 = (day === 0 && EVENING.has(role)) ? Math.max(t + tv, 1050) : t + tv;
+    const stay = Math.round(p.stay * STAY_SCALE[ctx.energy]), arrive = openAt(p, day, t0, stay, WAIT[role] ?? 40);
+    if (arrive == null) continue;
+    let w = explore ? (mk(p.id).been ? 0.2 : 1) * Math.exp((trust(p) - 4.2) * 2) : weight(p, ctx);
+    list.push({p, tv, stay, arrive, w: w * Math.exp(-tv / 25)});
+  }
+  return pick(list);
+}
+function regionCenter(region) {
+  const rp = places.filter(p => p.region === region && p.lat != null);
+  return {lat: rp.reduce((s, p) => s + p.lat, 0) / rp.length, lng: rp.reduce((s, p) => s + p.lng, 0) / rp.length};
+}
+function makePlan(ctx, keep) {
+  keep = keep || {};
+  const notes = [], exclude = new Set(Object.values(keep)), stops = [];
+  const roles = rolesFor(ctx.mode === 'trip' ? 'mon' : ctx.mode, ctx.energy, ctx.fun);
+  let from = HOME, t, day, region = ctx.region, deadline;
+  if (ctx.mode === 'trip') {
+    const center = regionCenter(region);
+    const goMode = ctx.transport === 'scooter' && region === 'kt' ? 'car' : ctx.transport;
+    const tvGo = travel(HOME, center, goMode);
+    let tt = ctx.start + tvGo;
+    stops.push({kind:'note', label:'從家出發', time: ctx.start, day:'週日'});
+    let night = keep.n && byId(keep.n) ? (() => { const p = byId(keep.n), tv = travel(center, p, ctx.transport); return {p, tv, stay:p.stay, arrive: tt + tv}; })()
+      : chooseStop('night', ctx, center, tt, 6, region, exclude);
+    if (night) { stops.push({kind:'place', role:'night', id: night.p.id, locked: !!keep.n, day:'週日'}); exclude.add(night.p.id); }
+    else notes.push('抵達' + REGION[region] + '時多數店家已打烊，建議直接入住。');
+    stops.push({kind:'note', label: REGION[region] + '住一晚', time: null, day:'週日'});
+    stops.push({kind:'start', label:'週一 10:00 從住宿出發', time: 600, day:'週一'});
+    from = center; t = 600; day = 0; deadline = ctx.homeBy;
+  } else if (ctx.mode === 'sun') {
+    t = ctx.start; day = 6; deadline = ctx.homeBy;
+    stops.push({kind:'start', label:'從家出發', time: t, day:'週日'});
+  } else {
+    t = ctx.start; day = 0; deadline = ctx.homeBy;
+    stops.push({kind:'start', label:'從家出發', time: t, day:'週一'});
+  }
+  roles.forEach((role, i) => {
+    let p0 = null;
+    if (keep[i] && byId(keep[i])) { const p = byId(keep[i]), tv = travel(from, p, ctx.transport); p0 = {p, tv, stay: Math.round(p.stay * STAY_SCALE[ctx.energy]), arrive: t + tv}; }
+    else p0 = chooseStop(role, ctx, from, t, day, region, exclude);
+    if (!p0) { notes.push('「' + ROLES[role].label + '」找不到符合條件、那時有開的店，已略過。'); return; }
+    exclude.add(p0.p.id);
+    stops.push({kind:'place', role, roleIndex: i, id: p0.p.id, locked: !!keep[i], day: day === 6 ? '週日' : '週一'});
+    from = p0.p; t = p0.arrive + p0.stay;
+  });
+  const pl = {ctx, stops, notes, region, day, deadline};
+  finalize(pl);
+  return pl;
+}
+function finalize(pl) {
+  const ctx = pl.ctx;
+  // 過夜的宵夜站：從住宿算
+  if (ctx.mode === 'trip') {
+    const center = regionCenter(pl.region), nightStop = pl.stops.find(s => s.role === 'night');
+    const goMode = ctx.transport === 'scooter' && pl.region === 'kt' ? 'car' : ctx.transport;
+    const arriveTown = ctx.start + travel(HOME, center, goMode);
+    pl.stops[0].time = ctx.start;
+    let after = arriveTown;
+    if (nightStop) { const p = byId(nightStop.id); nightStop.tv = travel(center, p, ctx.transport) + (arriveTown - ctx.start); nightStop.arrive = arriveTown + travel(center, p, ctx.transport); nightStop.leave = nightStop.arrive + p.stay; nightStop.closed = !openSpan(p, 6, nightStop.arrive, p.stay); after = nightStop.leave + 15; }
+    const rest = pl.stops.find(s => s.kind === 'note' && s.time === null || s.label?.includes('住一晚')); if (rest) rest.time = after;
+  }
+  const si = pl.stops.findIndex(s => s.kind === 'start');
+  let from = ctx.mode === 'trip' ? regionCenter(pl.region) : HOME, t = pl.stops[si].time, prev = ctx.mode === 'trip' ? '住宿' : '家';
+  for (let i = si + 1; i < pl.stops.length; i++) {
+    const s = pl.stops[i]; if (s.kind !== 'place') continue;
+    const p = byId(s.id), stay = Math.round(p.stay * STAY_SCALE[ctx.energy]);
+    s.tv = travel(from, p, ctx.transport);
+    const at = openAt(p, pl.day, (pl.day === 0 && EVENING.has(s.role)) ? Math.max(t + s.tv, 1050) : t + s.tv, stay, WAIT[s.role] ?? 40);
+    s.wait = at == null ? 0 : at - (t + s.tv);
+    s.arrive = at == null ? t + s.tv : at; s.leave = s.arrive + stay; s.prev = prev;
+    s.closed = at == null;
+    from = p; t = s.leave; prev = '上一站';
+  }
+  const backMode = ctx.mode === 'trip' && pl.region === 'kt' && ctx.transport === 'scooter' ? 'car' : ctx.transport;
+  pl.homeTv = travel(from, HOME, backMode); pl.homeAt = t + pl.homeTv;
+  if (pl.homeAt > pl.deadline) {
+    const cand = pl.stops.filter((s, i) => i > si && s.kind === 'place' && !s.locked);
+    if (cand.length) {
+      const plain = cand.filter(s => !ctx.fun.includes(s.role));
+      const drop = (plain.length ? plain : cand)[(plain.length ? plain : cand).length - 1];
+      pl.stops.splice(pl.stops.indexOf(drop), 1);
+      pl.notes.push('時間不夠，已自動拿掉「' + byId(drop.id).name + '」。');
+      return finalize(pl);
+    }
+  }
+  const last = [...pl.stops].reverse().find(s => s.kind === 'place');
+  pl.lastName = last ? byId(last.id).name : '';
+  pl.latestLeave = pl.deadline - pl.homeTv;
+}
+const planCost = pl => pl.stops.filter(s => s.kind === 'place').reduce((s, x) => s + byId(x.id).price * 2, 0);
+function bestPlan(ctx, keep) {
+  // 先看想加的行程有沒有排進去、站數夠不夠，再看預算
+  const score = pl => {
+    const roles = pl.stops.filter(s => s.kind === 'place').map(s => s.role);
+    const funHit = ctx.fun.filter(f => roles.includes(f) || (f === 'ktv' && roles.includes('ktv'))).length;
+    const over = ctx.budget ? Math.max(0, planCost(pl) - ctx.budget) : 0;
+    return funHit * 10000 + roles.length * 1000 - Math.min(over, 999) - (over ? 500 : 0);
+  };
+  let best = makePlan(ctx, keep), bs = score(best);
+  for (let i = 0; i < 20; i++) {
+    const ok = !ctx.budget || planCost(best) <= ctx.budget;
+    if (ok && best.notes.every(n => !n.includes('略過') && !n.includes('拿掉'))) break;
+    const pl = makePlan(ctx, keep), sc = score(pl);
+    if (sc > bs) { best = pl; bs = sc; }
+  }
+  if (ctx.budget && planCost(best) > ctx.budget) best.notes.push('排不進預算 ' + money(ctx.budget) + ' 元，可以拿掉一站或提高預算。');
+  return best;
+}
+function reasons(p, s, ctx) {
+  const r = [], m = mk(p.id);
+  if (p.favorite) r.push({t:'你們常去', c:'hi'});
+  if (p.karaoke) r.push({t:'可以唱歌', c:'hi'});
+  if (p.suspect) r.push({t:'邀評多，星等可能偏高', c:'w'});
+  const wt = wishText(m); if (wt) r.push({t: wt, c:'hi'});
+  if (s.closed) r.push({t:'這個時間可能沒開', c:'no'});
+  if (isNew(p)) r.push({t:'新店觀察中，評論還少', c:'w'});
+  if (m.been) r.push({t:'上次去 ' + md(m.been)});
+  if (ctx.filters.includes('rain') && p.indoor) r.push({t:'室內，下雨 OK'});
+  if (negative(p)) r.push({t:'有負評，看一下雷點', c:'w'});
+  return r;
+}
+function bookingHtml(p) {
+  const m = mk(p.id);
+  let h = '<div class="book">';
+  if (p.phone) h += '<div class="row" style="align-items:center"><span style="flex:1;min-width:0">電話 <b style="user-select:all">' + esc(p.phone) + '</b></span><a class="btn small" href="tel:' + esc(p.phone.replace(/[^0-9+]/g,'')) + '">打電話</a><button class="btn small" data-copy="' + esc(p.phone) + '">複製電話</button></div>';
+  else h += '<div class="meta">沒有查到電話</div>';
+  h += '<div class="row">' + (m.book ? '<a class="btn small primary" target="_blank" rel="noopener" href="' + esc(m.book) + '">線上訂位</a>' : '') +
+       '<a class="btn small" target="_blank" rel="noopener" href="' + mapsLink(p) + '">Google 地圖（有些店可直接訂位）</a></div>';
+  h += '<div class="row" style="align-items:center"><input type="url" placeholder="貼上 inline 或訂位連結" value="' + esc(m.book || '') + '" data-booklink="' + p.id + '" aria-label="訂位連結"><button class="btn small" data-savebook="' + p.id + '">存</button></div>';
+  return h + '</div>';
+}
+function dateLabel(ctx) {
+  if (ctx.mode === 'sun') return md(ctx.sunDate) + '（日）晚上';
+  if (ctx.mode === 'trip') return md(ctx.sunDate) + '（日）晚上出發，' + md(ctx.monDate) + '（一）回家';
+  return md(ctx.monDate) + '（一）';
+}
+function renderPlan() {
+  const el = $('#planOut'); if (!plan) return;
+  const ctx = plan.ctx, ps = plan.stops.filter(s => s.kind === 'place'), cost = planCost(plan);
+  if (!ps.length) { el.innerHTML = '<div class="empty"><strong>這個條件排不出行程</strong>' + esc([ctx.note, ...plan.notes].filter(Boolean).join(' ')) + '<br>可以少勾幾個條件、延後「最晚到家」，或換交通方式再試一次。</div>'; return; }
+  const must = new Set();
+  [[ctx.sunDate, ctx.mode !== 'mon'], [ctx.monDate, ctx.mode !== 'sun']].forEach(([d, use]) => { if (use && HOLIDAYS[d]) must.add(md(d) + ' 是' + HOLIDAYS[d] + '，店家可能調整營業時間。'); });
+  ps.forEach(s => { const p = byId(s.id); (p.flags || []).forEach(f => { if (/未確認|IG|不一|場次|預約|低消/.test(f)) must.add(p.name + '：' + f); }); });
+  must.add('營業時間依 Google 地圖時間表（查詢於 ' + md(meta.placesUpdated || '2026-10-10') + '），不是即時狀態。');
+  must.add('車程和花費都是估算。');
+  const modeName = {scooter:'騎車', car:'開車', transit:'大眾運輸'}[ctx.transport];
+  let h = '<div class="planhead"><div><h2>' + (ctx.mode === 'trip' ? REGION[plan.region] + '過夜' : ctx.mode === 'sun' ? '週日夜' : '週一約會') + '</h2><p>' + esc(dateLabel(ctx)) + (ctx.live ? '・現在出發' : '') + '</p></div><button class="btn small" id="reroll">沒鎖的重抽</button></div>';
+  if (ctx.note) h += '<p class="hint">' + esc(ctx.note) + '</p>';
+  h += '<div class="stats"><div class="stat"><b>' + money(cost) + '</b><span>兩人預估</span></div><div class="stat"><b>' + hm(plan.homeAt) + '</b><span>預計到家</span></div><div class="stat"><b>' + ps.length + ' 站</b><span>' + esc(ps.map(s => (ROLES[s.role] || {}).label).filter(Boolean).slice(0,3).join('・')) + '</span></div></div>';
+  h += '<ol class="tl">';
+  plan.stops.forEach((s, i) => {
+    if (s.kind !== 'place') { h += '<li class="stop"><div class="tm">' + (s.time != null ? hm(s.time) : '') + '<small>' + s.day + '</small></div><div class="card rest"><div class="meta"><b>' + esc(s.label) + '</b></div></div></li>'; return; }
+    const p = byId(s.id);
+    h += '<li class="leg">↓ ' + modeName + '約 ' + s.tv + ' 分（估' + (ctx.transport === 'transit' ? '' : '，含找停車') + '）' + (s.wait ? (s.wait >= 90 ? '・中間空檔約 ' + Math.round(s.wait / 30) / 2 + ' 小時，可以自由逛或回家休息' : '・等開門約 ' + s.wait + ' 分') : '') + '</li>';
+    h += '<li class="stop"><div class="tm">' + hm(s.arrive) + '<small>到 ' + hm(s.leave) + '</small></div><div class="card' + (s.locked ? ' locked' : '') + '">';
+    h += '<div class="top2"><span class="role">' + esc((ROLES[s.role] || {}).label || CAT[p.cat]) + (s.locked ? '・已鎖定' : '') + '</span><span class="area">' + esc(p.area) + '</span></div>';
+    h += '<div class="name">' + esc(p.name) + '</div>';
+    h += '<div class="meta">' + stars(p.rating) + ' ' + (p.rating || '') + '・' + money(p.reviews) + ' 則・' + esc(p.pros) + '</div>';
+    if (p.cons && !/沒有明顯缺點/.test(p.cons)) h += '<div class="meta">雷：' + esc(p.cons) + '</div>';
+    h += '<div class="meta">' + priceText(p) + '・停車：' + esc(p.park) + (ctx.transport === 'transit' && p.transit ? '・' + esc(p.transit) : '') + '</div>';
+    if (p.cat === 'cinema') { const tm = topMovie(); if (tm) h += '<div class="meta">最近評價好的片：<b>' + esc(tm.title) + '</b></div>'; }
+    const rs = reasons(p, s, ctx);
+    if (rs.length) h += '<ul class="tags">' + rs.map(r => '<li class="tag ' + (r.c || '') + '">' + esc(r.t) + '</li>').join('') + '</ul>';
+    h += '<div class="acts"><button class="btn small" data-lock="' + i + '" aria-pressed="' + !!s.locked + '">' + (s.locked ? '已鎖定' : '鎖定') + '</button><button class="btn small" data-swap="' + i + '">換這站</button><button class="btn small" data-bookt="' + i + '">預約</button><a class="btn small" target="_blank" rel="noopener" href="' + dirLink(p, ctx.transport) + '">導航</a></div>';
+    h += '<div data-bookbox="' + i + '" hidden>' + bookingHtml(p) + '</div>';
+    h += '</div></li>';
+  });
+  h += '<li class="leg">↓ 回家約 ' + plan.homeTv + ' 分（估）</li></ol>';
+  const slack = plan.deadline - plan.homeAt, cls = slack < 0 ? 'late' : slack < 30 ? 'tight' : '';
+  h += '<div class="home ' + cls + '">' + (plan.lastName ? '最晚 <b>' + hm(plan.latestLeave) + '</b> 要離開「' + esc(plan.lastName) + '」，' : '') + '才能在 ' + hm(plan.deadline) + ' 前到家。' + (slack < 0 ? '目前會超過，請拿掉一站。' : slack < 30 ? '時間有點趕。' : '時間很充裕。') + '</div>';
+  if (ctx.budget && cost > ctx.budget) h += '<div class="home late">超過預算 ' + money(cost - ctx.budget) + ' 元。</div>';
+  h += '<div class="notes"><b>出發前要確認</b><ul>' + [...plan.notes, ...must].map(n => '<li>' + esc(n) + '</li>').join('') + '</ul></div>';
+  h += '<div class="row" style="margin-top:12px"><button class="btn primary" id="savePlan">就決定這套</button></div>';
+  el.innerHTML = h;
+  $('#reroll').onclick = reroll;
+  $('#savePlan').onclick = saveTrip;
+  el.querySelectorAll('[data-lock]').forEach(b => b.onclick = () => { const s = plan.stops[+b.dataset.lock]; s.locked = !s.locked; renderPlan(); });
+  el.querySelectorAll('[data-swap]').forEach(b => b.onclick = () => swapStop(+b.dataset.swap));
+  el.querySelectorAll('[data-bookt]').forEach(b => b.onclick = () => { const box = el.querySelector('[data-bookbox="' + b.dataset.bookt + '"]'); box.hidden = !box.hidden; });
+  bindBooking(el);
+}
+function reroll() {
+  const keep = {};
+  plan.stops.forEach(s => { if (s.kind === 'place' && s.locked) { if (s.role === 'night' && plan.ctx.mode === 'trip') keep.n = s.id; else keep[s.roleIndex] = s.id; } });
+  plan = bestPlan(plan.ctx, keep); renderPlan();
+}
+function swapStop(i) {
+  const s = plan.stops[i], ctx = plan.ctx, ref = byId(s.id);
+  const used = new Set(plan.stops.filter(x => x.kind === 'place').map(x => x.id));
+  const prevP = [...plan.stops.slice(0, i)].reverse().find(x => x.kind === 'place');
+  const from = prevP ? byId(prevP.id) : ctx.mode === 'trip' ? regionCenter(plan.region) : HOME;
+  const day = ctx.mode === 'sun' || (ctx.mode === 'trip' && s.role === 'night') ? 6 : 0;
+  const t = s.arrive - s.tv;
+  const cats = (ROLES[s.role] || {cats:[ref.cat]}).cats;
+  const list = candidates(s.role in ROLES ? s.role : 'eat', ctx, ref.region).filter(p => cats.includes(p.cat) && !used.has(p.id)).map(p => {
+    const stay = Math.round(p.stay * STAY_SCALE[ctx.energy]), ok = openSpan(p, day, t + travel(from, p, ctx.transport), stay);
+    return {p, w: ok ? weight(p, ctx) * (p.cat === ref.cat ? 2 : 1) * Math.exp(-km(p, ref) / 5) : 0};
+  }).filter(x => x.w > 0);
+  const got = pick(list);
+  if (!got) { plan.notes.push('附近找不到其他有開的「' + ((ROLES[s.role] || {}).label || '') + '」，保留原本的店。'); renderPlan(); return; }
+  s.id = got.p.id; s.locked = false; finalize(plan); renderPlan();
+}
+function go(live) {
+  if (!places.length) { $('#planOut').innerHTML = '<div class="empty"><strong>地點資料還沒載入</strong>上方顯示「已載入」後再按一次。</div>'; return; }
+  plan = bestPlan(buildCtx(live), {}); renderPlan();
+  $('#planOut').scrollIntoView({behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block:'start'});
+}
+$('#goNow').onclick = () => go(true);
+$('#goNext').onclick = () => go(false);
+
+/* ---------- 預約連結 ---------- */
+function bindBooking(root) {
+  root.querySelectorAll('[data-copy]').forEach(b => b.onclick = () => copyText(b.dataset.copy, b));
+  root.querySelectorAll('[data-savebook]').forEach(b => b.onclick = async () => {
+    const id = b.dataset.savebook, inp = root.querySelector('[data-booklink="' + id + '"]'), v = inp.value.trim();
+    if (v && !/^https:\/\//.test(v)) { b.textContent = '要 https 開頭'; return; }
+    const m = Object.assign({}, mk(id), {book: v || null}); marks[id] = m;
+    if (!db) { b.textContent = '沒存到'; return; }
+    try { await db.doc('marks/' + id).set(m); b.textContent = '已存'; } catch(e) { b.textContent = '沒存到'; }
+  });
+}
+
+/* ---------- 地點 ---------- */
+Object.entries(CAT).forEach(([k, v]) => { $('#fCat').insertAdjacentHTML('beforeend', '<option value="' + k + '">' + v + '</option>'); $('#apCat').insertAdjacentHTML('beforeend', '<option value="' + k + '">' + v + '</option>'); });
+Object.keys(AREAS).forEach(a => $('#apArea').insertAdjacentHTML('beforeend', '<option>' + a + '</option>'));
+let fStatus = '';
+$$('#fStatus button').forEach(b => b.onclick = () => { fStatus = b.dataset.v; $$('#fStatus button').forEach(x => x.setAttribute('aria-pressed', String(x === b))); renderPlaces(); });
+['#q','#fRegion','#fCat'].forEach(s => $(s).addEventListener('input', renderPlaces));
+const openSet = new Set();
+let renderLimit = 60;
+function renderPlaces() {
+  if (!places.length) return;
+  const q = $('#q').value.trim(), r = $('#fRegion').value, c = $('#fCat').value;
+  let list = places.filter(p => (!r || p.region === r) && (!c || p.cat === c) && (!q || (p.name + p.area + REGION[p.region] + (CAT[p.cat]||'')).includes(q))).filter(p => {
+    const m = mk(p.id);
+    return !fStatus || (fStatus === 'fav' && p.favorite) || (fStatus === 'both' && m.me && m.cm) || (fStatus === 'want' && (m.me || m.cm)) || (fStatus === 'been' && m.been) || (fStatus === 'no' && m.no) || (fStatus === 'sing' && p.karaoke) || (fStatus === 'new' && isNew(p));
+  }).sort((a, b) => (b.favorite ? 1 : 0) - (a.favorite ? 1 : 0) || trust(b) - trust(a));
+  const el = $('#plist');
+  if (!list.length) { el.innerHTML = '<div class="empty"><strong>沒有符合的地點</strong>換個條件看看。</div>'; return; }
+  const shown = list.slice(0, renderLimit);
+  el.innerHTML = '<p class="hint" style="margin:0">共 ' + list.length + ' 個</p>' + shown.map(p => {
+    const m = mk(p.id), wt = wishText(m), monOpen = (p.hours?.[0] || []).length > 0;
+    let tg = '<li class="tag ' + (monOpen ? '' : 'no') + '">週一' + (monOpen ? '有開' : '公休') + '</li>';
+    if (openSpan(p, 6, 22*60 + 30, 45)) tg += '<li class="tag">週日 22:30 後有開</li>';
+    if (p.favorite) tg += '<li class="tag hi">你們常去</li>';
+    if (p.karaoke) tg += '<li class="tag hi">可以唱歌</li>';
+    if (p.suspect) tg += '<li class="tag w">邀評多</li>';
+    if (isNew(p)) tg += '<li class="tag w">新店觀察中</li>';
+    if (wt) tg += '<li class="tag hi">' + wt + '</li>';
+    if (m.been) tg += '<li class="tag">去過 ' + md(m.been) + '</li>';
+    if (m.no) tg += '<li class="tag no">不想去</li>';
+    return '<details class="pl" data-id="' + p.id + '"' + (openSet.has(p.id) ? ' open' : '') + '><summary><div style="min-width:0"><div class="name" style="font-size:15px">' + esc(p.name) + '</div><div class="meta">' + esc(REGION[p.region]) + '・' + esc(p.area) + '・' + esc(CAT[p.cat] || '') + '</div><ul class="tags">' + tg + '</ul></div><div style="text-align:right">' + stars(p.rating) + '<div class="meta">' + (p.rating || '–') + '（' + money(p.reviews) + '）</div></div></summary>' +
+      '<div class="body"><dl class="kv"><dt>推</dt><dd>' + esc(p.pros) + '</dd><dt>雷</dt><dd>' + esc(p.cons) + '</dd><dt>週一</dt><dd>' + hoursText(p, 0) + '</dd><dt>週日</dt><dd>' + hoursText(p, 6) + '</dd><dt>花費</dt><dd>' + priceText(p) + '</dd><dt>停車</dt><dd>' + esc(p.park) + '</dd>' + (p.transit ? '<dt>大眾運輸</dt><dd>' + esc(p.transit) + '</dd>' : '') + ((p.flags || []).length ? '<dt>注意</dt><dd>' + p.flags.map(esc).join('、') + '</dd>' : '') + '<dt>資料</dt><dd class="meta">' + esc(p.source) + '，' + md(p.checked) + '</dd></dl>' +
+      '<div class="acts"><button class="btn small" data-mk="me" aria-pressed="' + !!m.me + '">我想去</button><button class="btn small" data-mk="cm" aria-pressed="' + !!m.cm + '">草莓想去</button><button class="btn small" data-mk="been" aria-pressed="' + !!m.been + '">去過</button><button class="btn small" data-mk="no" aria-pressed="' + !!m.no + '">不想去</button></div>' + bookingHtml(p) + '</div></details>';
+  }).join('') + (list.length > renderLimit ? '<button class="btn" id="more" style="width:100%">再顯示 60 個</button>' : '');
+  el.querySelectorAll('details').forEach(d => d.addEventListener('toggle', () => d.open ? openSet.add(d.dataset.id) : openSet.delete(d.dataset.id)));
+  el.querySelectorAll('[data-mk]').forEach(b => b.onclick = () => {
+    const id = b.closest('details').dataset.id, k = b.dataset.mk, m = Object.assign({}, mk(id));
+    if (k === 'been') m.been = m.been ? null : ymd(new Date()); else m[k] = !m[k];
+    if (k === 'no' && m.no) { m.me = false; m.cm = false; }
+    marks[id] = m; renderPlaces();
+    if (db) db.doc('marks/' + id).set(m).catch(() => showBanner('標記沒有存到，請稍後再試。'));
+  });
+  if ($('#more')) $('#more').onclick = () => { renderLimit += 60; renderPlaces(); };
+  bindBooking(el);
+}
+$('#addPlaceBtn').onclick = () => { $('#addPlace').hidden = false; $('#addPlaceBtn').hidden = true; $('#apName').focus(); };
+$('#apCancel').onclick = () => { $('#addPlace').hidden = true; $('#addPlaceBtn').hidden = false; };
+$('#addPlace').addEventListener('submit', async e => {
+  e.preventDefault();
+  const name = $('#apName').value.trim(); if (!name) { $('#apMsg').textContent = '請填店名'; return; }
+  const area = $('#apArea').value, [lat, lng] = AREAS[area];
+  const region = area === '台南中西區' ? 'tn' : area === '屏東市' ? 'pts' : area === '恆春墾丁' ? 'kt' : 'ks';
+  const price = Math.max(0, +$('#apPrice').value || 0);
+  const doc = {name, cat: $('#apCat').value, region, area, lat, lng, rating: null, reviews: 0, price, priceRange: [price, price, price],
+    stay: Math.max(10, +$('#apStay').value || 60), hours: Array(7).fill([[660, 1320]]), indoor: true, queue: false, park: '停車資訊未確認', ride: 'scooter', transit: '',
+    pros: $('#apNote').value.trim() || '自己新增的店', cons: '營業時間未確認', flags: ['營業時間未確認'], placeId: '', checked: ymd(new Date()), source: '自己新增', isNew: false, addedBy: '自己新增', karaoke: false};
+  if (!db) { $('#apMsg').textContent = '沒新增成功'; return; }
+  try { await db.doc('places/u' + Date.now()).set(doc); $('#apMsg').textContent = '已新增「' + name + '」'; $('#apName').value = ''; $('#apNote').value = ''; }
+  catch(err) { $('#apMsg').textContent = '沒新增成功，請再試一次'; }
+});
+
+/* ---------- 電影 ---------- */
+const topMovie = () => [...movies].filter(m => m.rating).sort((a, b) => b.rating - a.rating)[0];
+function renderMovies() {
+  if (movies.length) {
+    $('#mlist').innerHTML = [...movies].sort((a, b) => (b.rating || 0) - (a.rating || 0) || (b.release || '').localeCompare(a.release || '')).map(m => {
+      const cs = places.filter(p => p.cat === 'cinema');
+      return '<div class="card"><div class="top2"><div class="name">' + esc(m.title) + '</div><div>' + (m.rating ? stars(m.rating) : '') + '</div></div>' +
+        '<div class="meta">' + (m.release ? md(m.release) + ' 上映' : '') + (m.genre ? '・' + esc(m.genre) : '') + (m.runtime ? '・' + m.runtime + ' 分' : '') + '</div>' +
+        '<div class="meta">' + (m.rating ? '<b>' + m.rating + ' / 5</b>' + (m.ratingSrc ? '（' + esc(m.ratingSrc) + '）' : '') : '評價還少') + '</div>' +
+        (m.summary ? '<div style="font-size:14px;margin-top:4px">' + esc(m.summary) + '</div>' : '') +
+        (m.verdict ? '<div class="meta">口碑：' + esc(m.verdict) + '</div>' : '') +
+        '<div class="acts">' + cs.map(p => '<a class="btn small" target="_blank" rel="noopener" href="https://www.google.com/search?q=' + encodeURIComponent(m.title + ' ' + p.name + ' 時刻表') + '">' + esc(p.name.replace(/影城|高雄/g, '')) + '</a>').join('') + '</div>' +
+        (m.checked ? '<div class="meta">更新於 ' + md(m.checked) + '</div>' : '') + '</div>';
+    }).join('');
+  }
+  $('#clist').innerHTML = places.filter(p => p.cat === 'cinema').map(p => '<div class="card"><div class="top2"><div class="name" style="font-size:15px">' + esc(p.name) + '</div><div>' + stars(p.rating) + '</div></div><div class="meta">' + esc(p.area) + '・' + esc(p.pros) + '</div><div class="meta">停車：' + esc(p.park) + (p.transit ? '・' + esc(p.transit) : '') + '</div><div class="acts"><a class="btn small" target="_blank" rel="noopener" href="' + mapsLink(p) + '">Google 地圖</a></div></div>').join('');
+}
+
+/* ---------- 帳本：拍收據 ---------- */
+let draft = null;
+function handleFile(inp) {
+  const f = inp.files && inp.files[0]; inp.value = '';
+  if (!f) return;
+  readReceipt(f);
+}
+async function readReceipt(file) {
+  const box = $('#receiptBox');
+  if (!sample) { box.innerHTML = '<div class="banner">這裡讀不到收據，請在 Claude App 或 claude.ai 打開這個頁面；也可以按「手動記」。</div>'; return; }
+  box.innerHTML = '<div class="panel"><b>讀取收據中…</b><p class="hint">第一次使用會詢問是否允許，按允許就好。大約需要十幾秒。</p></div>';
+  const prompt = '這是一張台灣的收據或發票照片。請讀出內容，只回傳一個 JSON 物件：' +
+    '{"store":"店名","storeGuessed":true或false,"date":"YYYY-MM-DD","payment":"現金/信用卡/其他","items":[{"name":"品項","amount":數字,"kind":"吃|穿|用|玩"}],"total":數字,"title":"給人看的簡短標題"}。規則：' +
+    '1. 店名只寫收據上印的字；若只看到分店代號或沒印店名，可依線索推測但 storeGuessed 設 true；完全看不出就寫「未知」。不要被收據兩側的廣告 Logo 誤導。' +
+    '2. 品項用口語簡短的寫法，例如「牛肉麵」「港式飲茶」「寬褲」「帆布鞋」，套餐寫主餐名就好，同一套餐的附餐不用拆開。' +
+    '3. kind：食物飲料=吃，衣服鞋子包包飾品=穿，日用品雜貨3C=用，電影唱歌按摩門票=玩。' +
+    '4. 折扣要算進品項金額，items 加總要等於 total；若收據沒列出各項折後金額，就平均分攤並照實算。' +
+    '5. total 用實付總金額。6. title 例如「牛肉麵、壽喜飯」，最多兩三樣。7. 看不清的欄位寫 null。';
+  try {
+    const r = await sample.json(prompt, {images: file, modelTier: 'default', cache: false});
+    if (!r || typeof r !== 'object') throw {code: 'invalid_json'};
+    const items = Array.isArray(r.items) ? r.items.map(x => ({name: String(x.name || '品項'), amount: Math.round(+x.amount || 0), kind: KINDS.includes(x.kind) ? x.kind : '吃'})) : [];
+    draft = {title: String(r.title || items.map(x => x.name).slice(0, 2).join('、') || '一筆花費'), store: String(r.store || '未知'), storeGuessed: !!r.storeGuessed,
+      date: /^\d{4}-\d{2}-\d{2}$/.test(r.date || '') ? r.date : ymd(new Date()), payment: String(r.payment || ''), items, total: Math.round(+r.total || items.reduce((s, x) => s + x.amount, 0)), source: '拍收據'};
+    renderDraft();
+  } catch(e) {
+    const msg = {not_granted:'沒有允許讀取，改用「手動記」也可以。', rate_limited:'讀太多次了，請稍後再試。', image_rejected:'這張照片讀不了，請換一張清楚的。', images_unavailable:'這個裝置不能傳照片給 Claude，請改用「手動記」。', invalid_json:'沒讀懂這張收據，請拍清楚一點再試。', refused:'沒辦法讀這張圖片。'}[e && e.code] || '讀取失敗，請再試一次。';
+    box.innerHTML = '<div class="banner">' + msg + '</div>';
+  }
+}
+function manualDraft() { draft = {title: '', store: '', storeGuessed: false, date: ymd(new Date()), payment: '', items: [{name: '', amount: 0, kind: '吃'}], total: 0, source: '手動記'}; renderDraft(); }
+$('#manualBtn').onclick = manualDraft;
+function renderDraft() {
+  const box = $('#receiptBox'); if (!draft) { box.innerHTML = ''; return; }
+  const sum = draft.items.reduce((s, x) => s + (+x.amount || 0), 0);
+  box.innerHTML = '<div class="panel" style="border:1.5px solid var(--accent)"><div class="eyebrow">' + (draft.source === '拍收據' ? '讀到這張收據・請確認' : '手動記一筆') + '</div>' +
+    '<label class="field" style="margin-top:8px">記成<input id="dTitle" value="' + esc(draft.title) + '" placeholder="例如：牛肉麵、壽喜飯"></label>' +
+    '<div class="grid2" style="margin-top:8px"><label class="field">店家' + (draft.storeGuessed ? '（推測）' : '') + '<input id="dStore" value="' + esc(draft.store) + '"></label><label class="field">日期<input id="dDate" type="date" value="' + esc(draft.date) + '"></label></div>' +
+    '<p class="label">明細</p>' + draft.items.map((x, i) => '<div class="item"><select data-ik="' + i + '" aria-label="分類">' + KINDS.map(k => '<option' + (k === x.kind ? ' selected' : '') + '>' + k + '</option>').join('') + '</select><input data-in="' + i + '" value="' + esc(x.name) + '" placeholder="品項" aria-label="品項"><input data-ia="' + i + '" type="number" inputmode="numeric" value="' + (x.amount || '') + '" placeholder="金額" aria-label="金額"><button class="xbtn" data-ix="' + i + '" aria-label="刪除這行">×</button></div>').join('') +
+    '<button class="btn small" id="dAdd" style="margin-top:8px">＋ 加一行</button>' +
+    '<label class="field" style="margin-top:10px">總計（實付）<input id="dTotal" type="number" inputmode="numeric" value="' + (draft.total || sum || '') + '"></label>' +
+    (sum && draft.total && sum !== draft.total ? '<p class="hint" style="color:var(--warn)">明細加起來 ' + money(sum) + '，跟總計 ' + money(draft.total) + ' 不一樣，請確認。</p>' : '') +
+    (draft.storeGuessed ? '<p class="hint">收據上沒印清楚店名，這是推測的，不對可以直接改。</p>' : '') +
+    '<div class="row" style="margin-top:10px"><button class="btn" id="dCancel">取消</button><button class="btn primary" id="dSave">確認存入</button></div><p class="hint" id="dMsg"></p></div>';
+  const pull = () => {
+    draft.title = $('#dTitle').value; draft.store = $('#dStore').value; draft.date = $('#dDate').value; draft.total = Math.round(+$('#dTotal').value || 0);
+    box.querySelectorAll('[data-in]').forEach(i => draft.items[+i.dataset.in].name = i.value);
+    box.querySelectorAll('[data-ia]').forEach(i => draft.items[+i.dataset.ia].amount = Math.round(+i.value || 0));
+    box.querySelectorAll('[data-ik]').forEach(i => draft.items[+i.dataset.ik].kind = i.value);
+  };
+  box.querySelectorAll('[data-ix]').forEach(b => b.onclick = () => { pull(); draft.items.splice(+b.dataset.ix, 1); renderDraft(); });
+  $('#dAdd').onclick = () => { pull(); draft.items.push({name: '', amount: 0, kind: '吃'}); renderDraft(); };
+  $('#dCancel').onclick = () => { draft = null; renderDraft(); };
+  $('#dSave').onclick = async () => {
+    pull();
+    draft.items = draft.items.filter(x => x.name.trim() || x.amount);
+    if (!draft.total) draft.total = draft.items.reduce((s, x) => s + x.amount, 0);
+    if (!draft.total) { $('#dMsg').textContent = '請填金額'; return; }
+    if (!draft.items.length) draft.items = [{name: draft.title || '花費', amount: draft.total, kind: '吃'}];
+    if (!draft.title.trim()) draft.title = draft.items.map(x => x.name).filter(Boolean).slice(0, 2).join('、') || '一筆花費';
+    if (!db) { $('#dMsg').textContent = '沒存到，請再試一次'; return; }
+    $('#dSave').disabled = true;
+    try { await db.doc('expenses/e' + Date.now()).set(Object.assign({}, draft, {created: new Date().toISOString()})); draft = null; renderDraft(); $('#receiptHint').textContent = '已存入。'; }
+    catch(e) { $('#dSave').disabled = false; $('#dMsg').textContent = '沒存到，請再按一次'; }
+  };
+}
+function kindTotals(list) {
+  const t = {吃:0, 穿:0, 用:0, 玩:0};
+  list.forEach(e => {
+    const sum = (e.items || []).reduce((s, x) => s + (+x.amount || 0), 0) || e.total;
+    (e.items || []).forEach(x => { t[x.kind] = (t[x.kind] || 0) + Math.round((+x.amount || 0) * (e.total / sum)); });
+  });
+  return t;
+}
+function renderLedger() {
+  const now = new Date(), ym = now.getFullYear() + '-' + pad(now.getMonth() + 1);
+  const month = expenses.filter(e => (e.date || '').startsWith(ym)), total = month.reduce((s, e) => s + (+e.total || 0), 0), kt = kindTotals(month);
+  $('#ledgerStats').innerHTML = '<div class="stat"><b>' + money(total) + '</b><span>' + (now.getMonth() + 1) + ' 月花費</span></div><div class="stat"><b>' + money(kt['吃']) + '</b><span>吃</span></div><div class="stat"><b>' + money(kt['穿'] + kt['用'] + kt['玩']) + '</b><span>穿・用・玩</span></div>';
+  const all = Object.values(kt).reduce((a, b) => a + b, 0);
+  $('#kindBar').innerHTML = all ? KINDS.map(k => '<span class="k-' + k + '" style="width:' + (kt[k] / all * 100) + '%"></span>').join('') : '';
+  $('#kindLegend').innerHTML = all ? KINDS.filter(k => kt[k]).map(k => '<span><span class="dot k-' + k + '"></span>' + k + ' ' + Math.round(kt[k] / all * 100) + '%</span>').join('') : '<span>這個月還沒有花費</span>';
+  const el = $('#elist');
+  if (expenses.length) el.innerHTML = [...expenses].sort((a, b) => (b.date || '').localeCompare(a.date || '') || (b.created || '').localeCompare(a.created || '')).slice(0, 60).map(e =>
+    '<div class="card"><div class="top2"><div class="name" style="font-size:15px">' + esc(e.title) + '</div><b>' + money(e.total) + '</b></div><div class="meta">' + [...new Set((e.items || []).map(x => x.kind))].map(k => '<span class="kind k-' + k + '">' + k + '</span> ').join('') + esc(e.store || '') + (e.storeGuessed ? '（推測）' : '') + '・' + md(e.date) + '・' + esc(e.source || '') + '</div>' +
+    '<div class="acts"><button class="btn small" data-del="' + e.id + '">刪除</button></div></div>').join('');
+  el.querySelectorAll('[data-del]').forEach(b => b.onclick = async () => {
+    if (b.dataset.sure !== '1') { b.dataset.sure = '1'; b.textContent = '再按一次確定刪除'; return; }
+    try { await db.doc('expenses/' + b.dataset.del).delete(); } catch(e) { b.textContent = '沒刪掉，再試一次'; }
+  });
+}
+
+/* ---------- 約會紀錄 ---------- */
+async function saveTrip() {
+  const ctx = plan.ctx, ps = plan.stops.filter(s => s.kind === 'place'), date = ctx.mode === 'sun' ? ctx.sunDate : ctx.monDate, btn = $('#savePlan');
+  if (!ps.length) { btn.textContent = '這套沒有排到任何地點'; return; }
+  if (!db) { btn.textContent = '沒存到，請再試一次'; return; }
+  btn.disabled = true; btn.textContent = '儲存中…';
+  try {
+    await db.doc('trips/t' + Date.now()).set({date, mode: ctx.mode, region: plan.region, stops: ps.map(s => ({id: s.id, name: byId(s.id).name, arrive: hm(s.arrive)})), est: planCost(plan), stars: null, note: '', created: new Date().toISOString()});
+    for (const s of ps) { const m = Object.assign({}, mk(s.id), {been: date}); marks[s.id] = m; await db.doc('marks/' + s.id).set(m); }
+    btn.textContent = '已存到帳本的約會紀錄';
+  } catch(e) { btn.disabled = false; btn.textContent = '沒存到，再按一次'; }
+}
+function renderTrips() {
+  const el = $('#tlist'); if (!trips.length) return;
+  el.innerHTML = [...trips].sort((a, b) => (b.date || '').localeCompare(a.date || '')).map(t => '<div class="card"><div class="top2"><div class="name" style="font-size:15px">' + md(t.date) + '・' + ({sun:'週日夜', mon:'週一', trip:(REGION[t.region] || '') + '過夜'}[t.mode] || '') + '</div><span class="meta">預估 ' + money(t.est) + '</span></div><div class="meta">' + t.stops.map(s => esc(s.name)).join(' → ') + '</div>' +
+    '<div class="grid2" style="margin-top:6px"><label class="field">喜歡程度<select data-ts="' + t.id + '"><option value="">未評</option>' + [5,4,3,2,1].map(n => '<option value="' + n + '"' + (t.stars === n ? ' selected' : '') + '>' + '★'.repeat(n) + '</option>').join('') + '</select></label><label class="field">心得<input data-tn="' + t.id + '" value="' + esc(t.note || '') + '" placeholder="例如：甜點超好吃"></label></div>' +
+    '<div class="acts"><button class="btn small" data-tsave="' + t.id + '">儲存</button></div></div>').join('');
+  el.querySelectorAll('[data-tsave]').forEach(b => b.onclick = async () => {
+    const id = b.dataset.tsave, s = el.querySelector('[data-ts="' + id + '"]').value, n = el.querySelector('[data-tn="' + id + '"]').value.trim();
+    try { await db.doc('trips/' + id).update({stars: s ? +s : null, note: n}); b.textContent = '已儲存'; } catch(e) { b.textContent = '沒存到'; }
+  });
+}
+
+function updateDataline() {
+  if (!places.length) return;
+  const n = {}; places.forEach(p => n[p.region] = (n[p.region] || 0) + 1);
+  $('#dataline').textContent = places.length + ' 個地點（高雄 ' + (n.ks || 0) + '・台南 ' + (n.tn || 0) + '・屏東 ' + ((n.pts || 0) + (n.kt || 0)) + '）・資料更新於 ' + md(meta.placesUpdated || '2026-10-10');
+}
+
+/* ---------- 本機儲存（取代雲端資料庫） ---------- */
+const LS = 'dp_store_v1';
+let store = {marks:{}, trips:{}, expenses:{}, prefs:{}, places:{}};
+try { const raw = localStorage.getItem(LS); if (raw) store = Object.assign(store, JSON.parse(raw)); } catch(e) {}
+let staticPlaces = {}, staticMovies = {}, staticMeta = {};
+const listeners = [];
+function persist() { try { localStorage.setItem(LS, JSON.stringify(store)); } catch(e) { showBanner('這支手機的瀏覽器存不了資料，請不要用無痕模式。'); } }
+function colData(c) {
+  if (c === 'places') return Object.assign({}, staticPlaces, store.places);
+  if (c === 'movies') return staticMovies;
+  return store[c] || {};
+}
+function snap(c) { const docs = Object.entries(colData(c)).map(([id, d]) => ({id, exists: true, data: () => d})); return {docs, size: docs.length, empty: !docs.length, metadata: {fromCache: false}}; }
+function fire(c) { listeners.filter(l => l.c === c).forEach(l => l.fn(snap(c))); }
+db = {
+  collection: c => ({onSnapshot: fn => { listeners.push({c, fn}); fn(snap(c)); return () => {}; }}),
+  doc: path => { const [c, id] = path.split('/'); return {
+    get: async () => ({exists: !!colData(c)[id], data: () => colData(c)[id]}),
+    set: async d => { (store[c] = store[c] || {})[id] = JSON.parse(JSON.stringify(d)); persist(); fire(c); },
+    update: async d => { store[c] = store[c] || {}; store[c][id] = Object.assign({}, store[c][id] || colData(c)[id], d); persist(); fire(c); },
+    delete: async () => { if (store[c]) delete store[c][id]; persist(); fire(c); },
+    onSnapshot: fn => { fn({exists: !!staticMeta.placesUpdated, data: () => staticMeta}); return () => {}; }
+  }; }
+};
+(async () => {
+  try {
+    const [p, m, me] = await Promise.all(['data/places.json', 'data/movies.json', 'data/meta.json'].map(u => fetch(u + '?v=' + Date.now()).then(r => r.ok ? r.json() : {})));
+    staticPlaces = p; staticMovies = m; staticMeta = me; meta = me;
+  } catch(e) { showBanner('地點資料下載失敗，請確認有網路再重新整理。'); }
+  db.collection('places').onSnapshot(s => { places = s.docs.map(d => Object.assign({id: d.id}, d.data())); updateDataline(); renderPlaces(); renderMovies(); });
+  db.collection('marks').onSnapshot(s => { marks = {}; s.docs.forEach(d => marks[d.id] = d.data()); renderPlaces(); });
+  db.collection('trips').onSnapshot(s => { trips = s.docs.map(d => Object.assign({id: d.id}, d.data())); renderTrips(); });
+  db.collection('expenses').onSnapshot(s => { expenses = s.docs.map(d => Object.assign({id: d.id}, d.data())); renderLedger(); });
+  db.collection('movies').onSnapshot(s => { movies = s.docs.map(d => Object.assign({id: d.id}, d.data())); renderMovies(); });
+  updateDataline();
+  if (store.prefs && store.prefs.main) { prefs = Object.assign(prefs, store.prefs.main); syncControls(); }
+  prefsLoaded = true;
+  importFromShortcut();
+})();
+
+/* 捷徑帶回來的收據：網址 ?r=JSON */
+function importFromShortcut() {
+  const q = new URLSearchParams(location.search), raw = q.get('r');
+  if (!raw) return;
+  history.replaceState(null, '', location.pathname);
+  let r;
+  try { r = JSON.parse(raw.replace(/^[^{]*/, '').replace(/[^}]*$/, '')); } catch(e) { showBanner('捷徑傳回來的內容讀不懂，請改用「手動記」。'); return; }
+  const items = Array.isArray(r.items) ? r.items.map(x => ({name: String(x.name || '品項'), amount: Math.round(+x.amount || 0), kind: KINDS.includes(x.kind) ? x.kind : '吃'})) : [];
+  draft = {title: String(r.title || items.map(x => x.name).slice(0, 2).join('、') || '一筆花費'), store: String(r.store || '未知'), storeGuessed: !!r.storeGuessed,
+    date: /^\d{4}-\d{2}-\d{2}$/.test(r.date || '') ? r.date : ymd(new Date()), payment: String(r.payment || ''), items, total: Math.round(+r.total || items.reduce((s, x) => s + x.amount, 0)), source: '拍收據'};
+  $$('nav.tabbar button').forEach(x => x.setAttribute('aria-selected', String(x.dataset.tab === 'ledger')));
+  ['plan','places','movies','ledger'].forEach(t => $('#tab-' + t).hidden = t !== 'ledger');
+  renderDraft();
+}
+
+/* 捷徑設定說明 */
+const PROMPT = '這是一張台灣的收據或發票照片。只回傳一個 JSON 物件，不要其他文字：{"store":"店名","storeGuessed":true或false,"date":"YYYY-MM-DD","payment":"現金/信用卡/其他","items":[{"name":"品項","amount":數字,"kind":"吃|穿|用|玩"}],"total":數字,"title":"簡短標題"}。店名只寫收據上印的字，只看到分店代號就推測並把 storeGuessed 設 true，不要被兩側廣告 Logo 誤導。品項用口語短寫（牛肉麵、寬褲、帆布鞋），套餐寫主餐名。食物=吃，衣服鞋包=穿，日用品=用，電影唱歌按摩=玩。折扣算進品項，items 加總等於 total。title 最多寫兩三樣。';
+$('#scHelp').onclick = e => {
+  e.preventDefault();
+  const g = $('#scGuide'); g.hidden = !g.hidden; if (g.hidden) return;
+  g.innerHTML = '<b>設定「拍收據記帳」捷徑（只要做一次）</b><ol style="padding-left:20px;margin:8px 0;display:grid;gap:6px;font-size:14px">' +
+    '<li>捷徑 App 右上 ＋，取名 <b>拍收據記帳</b>（一個字都不能差）</li>' +
+    '<li>加入「<b>拍照</b>」（想用相簿照片就改加「選取照片」）</li>' +
+    '<li>加入「<b>使用模型</b>」，模型選 ChatGPT，框框裡在「照片」後面貼上下面這段指令；展開後把「後續追蹤」關掉、輸出選「文字」</li>' +
+    '<li>加入「<b>URL 編碼</b>」，輸入選「回應」</li>' +
+    '<li>加入「<b>URL</b>」，內容打 <span style="user-select:all;word-break:break-all">' + esc(location.origin + location.pathname) + '?r=</span> 後面插入變數「URL 編碼的文字」</li>' +
+    '<li>加入「<b>打開 URL</b>」，完成</li></ol>' +
+    '<p class="hint">要貼的指令：</p><textarea id="pmt" rows="6" readonly style="font-size:13px">' + esc(PROMPT) + '</textarea>' +
+    '<div class="row" style="margin-top:8px"><button class="btn small" id="cpPmt">複製指令</button><button class="btn small" id="cpUrl">複製網址</button></div>';
+  $('#cpPmt').onclick = e2 => { navigator.clipboard?.writeText(PROMPT).then(() => e2.target.textContent = '已複製', () => { $('#pmt').select(); }); };
+  $('#cpUrl').onclick = e2 => { navigator.clipboard?.writeText(location.origin + location.pathname + '?r=').then(() => e2.target.textContent = '已複製'); };
+};
+
+/* 備份 */
+$('#expBtn').onclick = () => {
+  const blob = new Blob([JSON.stringify({app: 'date-planner', at: new Date().toISOString(), store}, null, 1)], {type: 'application/json'});
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = '週一去哪備份-' + ymd(new Date()) + '.json';
+  document.body.appendChild(a); a.click(); a.remove();
+  $('#bkMsg').textContent = '已匯出，檔案會存到「檔案」App 的下載項目。';
+};
+$('#impIn').addEventListener('change', async e => {
+  const f = e.target.files && e.target.files[0]; e.target.value = ''; if (!f) return;
+  try {
+    const j = JSON.parse(await f.text()); if (j.app !== 'date-planner' || !j.store) throw 0;
+    ['marks','trips','expenses','places','prefs'].forEach(k => store[k] = Object.assign({}, store[k], j.store[k] || {}));
+    persist(); ['places','marks','trips','expenses'].forEach(fire);
+    $('#bkMsg').textContent = '已匯入，舊資料會和這支手機的資料合併。';
+  } catch(err) { $('#bkMsg').textContent = '這個檔案不是週一去哪的備份。'; }
+});
+renderLedger();
+})();
+</script>
+
+</body></html>
