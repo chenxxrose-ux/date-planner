@@ -49,6 +49,9 @@ input,select,textarea{font:15px var(--sans);color:var(--ink);background:var(--bg
 .btn{border:1px solid var(--line);background:var(--paper);color:var(--ink);border-radius:12px;padding:10px 14px;font:500 14px var(--sans);cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:6px}
 .btn.primary{background:var(--accent);border-color:transparent;color:var(--accent-ink)}
 .btn.big{width:100%;padding:14px;font-size:17px;font-family:var(--serif);letter-spacing:.04em;margin-top:14px}
+.btn.dice{margin-top:8px;border-style:dashed}
+.dicebox{display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap;padding:12px 14px;margin:12px 0;border:1px dashed var(--accent);border-radius:14px;line-height:1.5}
+.dicebox .btn{flex:none}
 .btn.small{padding:5px 10px;font-size:13px;border-radius:9px}
 .btn[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);border-color:transparent}
 .btn:disabled{opacity:.5}
@@ -218,6 +221,8 @@ button:focus-visible,select:focus-visible,input:focus-visible,summary:focus-visi
       <button class="chip" data-v="gaybar" aria-pressed="false">同志酒吧</button>
       <button class="chip" data-v="ktv" aria-pressed="false">唱歌</button>
       <button class="chip" data-v="cinema" aria-pressed="false">看電影</button>
+      <button class="chip" data-v="arcade" aria-pressed="false">夾娃娃・彈珠・電玩</button>
+      <button class="chip" data-v="play" aria-pressed="false">撞球・保齡球・密室・桌遊</button>
     </div>
     <div id="lgbtBox" hidden>
       <p class="label">同志酒吧要哪一種</p>
@@ -232,10 +237,10 @@ button:focus-visible,select:focus-visible,input:focus-visible,summary:focus-visi
       <button class="chip" data-v="rain" aria-pressed="false">下雨備案</button>
       <button class="chip" data-v="sing" aria-pressed="false">要能唱歌</button>
       <button class="chip" data-v="nopr" aria-pressed="false">不要有公關的店</button>
-      <button class="chip" data-v="nohost" aria-pressed="false">不要酒店型</button>
     </div>
     <label class="field" style="margin-top:14px">兩人預算（元，含交通住宿）<input id="budget" type="number" inputmode="numeric" min="0" step="100"></label>
     <button class="btn primary big" id="goNext">照這個時間排</button>
+    <button class="btn big dice" id="goRandom">🎲 不知道去哪？隨機幫我們決定</button>
     <button class="btn" id="goNow" style="width:100%;margin-top:8px">現在出發</button>
     <p class="hint" id="goHint">「現在出發」會把出發改成現在，回家時間不變。</p>
   </div>
@@ -364,7 +369,7 @@ button:focus-visible,select:focus-visible,input:focus-visible,summary:focus-visi
 const $ = s => document.querySelector(s);
 const $$ = s => [...document.querySelectorAll(s)];
 const HOME = {lat:22.6005, lng:120.3365};
-const CAT = {sight:'景點', eat:'吃飯', fine:'高級餐廳', snack:'平價小吃', bbq:'燒肉', hotpot:'火鍋', dessert:'甜點咖啡', shop:'逛小廢物', mall:'商場', market:'夜市', nightview:'夜景', izakaya:'居酒屋', bar:'酒吧', massage:'按摩', hairspa:'越式洗髮', ktv:'唱歌 KTV', cinema:'電影院'};
+const CAT = {sight:'景點', eat:'吃飯', fine:'高級餐廳', snack:'平價小吃', bbq:'燒肉', hotpot:'火鍋', dessert:'甜點咖啡', shop:'逛小廢物', mall:'商場', market:'夜市', nightview:'夜景', izakaya:'居酒屋', bar:'酒吧', massage:'按摩', hairspa:'越式洗髮', ktv:'唱歌 KTV', cinema:'電影院', arcade:'夾娃娃・彈珠・電玩', play:'撞球・保齡球・密室・桌遊'};
 const AREAS = {'鳳山區':[22.627,120.357],'苓雅區':[22.622,120.312],'新興區':[22.631,120.307],'前金區':[22.627,120.294],'前鎮區':[22.596,120.318],'三民區':[22.648,120.315],'鹽埕區':[22.624,120.284],'鼓山區':[22.648,120.278],'左營區':[22.678,120.296],'台南中西區':[22.993,120.200],'屏東市':[22.672,120.488],'恆春墾丁':[21.960,120.760]};
 const HOLIDAYS = {'2026-10-09':'國慶補假','2026-10-10':'國慶日','2026-10-25':'光復節','2026-10-26':'光復節補假','2026-12-25':'行憲紀念日','2027-01-01':'元旦','2027-02-05':'除夕','2027-02-06':'春節','2027-02-07':'春節','2027-02-08':'春節','2027-02-09':'春節補假','2027-02-10':'春節補假','2027-02-28':'和平紀念日','2027-03-01':'和平紀念日補假','2027-04-04':'兒童節','2027-04-05':'清明節','2027-05-01':'勞動節','2027-06-09':'端午節','2027-09-15':'中秋節','2027-09-28':'教師節','2027-10-10':'國慶日','2027-10-11':'國慶補假'};
 const KINDS = ['吃','穿','用','玩'];
@@ -563,6 +568,7 @@ function fillRegions() {
     '<option value="' + r.k + '">' + (r.fit && !r.R.local ? '★ ' : '') + r.R.name + (r.R.local ? '' : '・' + ml + '約 ' + fmt(r.mins)) + (r.bad ? '（不適合騎車）' : '') + '</option>').join('') + '</optgroup>').join('');
   $('#region').value = prefs.region;
   const fits = rows.filter(r => r.fit && !r.R.local).map(r => r.R.name);
+  window._fitRegions = rows.filter(r => r.fit && !r.R.local).map(r => r.k);
   $('#regionInfo').textContent = regionInfo() + (fits.length ? '\n這次' + (nights ? ' ' + (nights + 1) + ' 天 ' + nights + ' 夜' : '當天來回') + '，' + ml + '適合去：' + fits.join('、') + '（選單裡有 ★ 的）' : '\n這次時間比較短，建議在高雄附近玩。');
 }
 (function initRegionSelect() {
@@ -605,7 +611,8 @@ const ROLES = {
   fine:{label:'高級餐廳', cats:['fine']}, nightview:{label:'看夜景', cats:['nightview']}, snack:{label:'平價小吃', cats:['snack']}, bbq:{label:'燒肉', cats:['bbq']}, hotpot:{label:'火鍋', cats:['hotpot']},
   night:{label:'宵夜', cats:['market','izakaya','snack','hotpot','bbq','eat']},
   massage:{label:'按摩', cats:['massage']}, hairspa:{label:'越式洗髮', cats:['hairspa']}, izakaya:{label:'居酒屋', cats:['izakaya']},
-  bar:{label:'酒吧', cats:['bar']}, gaybar:{label:'同志酒吧', cats:['bar']}, ktv:{label:'唱歌', cats:['ktv','bar']}, cinema:{label:'看電影', cats:['cinema']}
+  bar:{label:'酒吧', cats:['bar']}, gaybar:{label:'同志酒吧', cats:['bar']}, ktv:{label:'唱歌', cats:['ktv','bar']}, cinema:{label:'看電影', cats:['cinema']},
+  arcade:{label:'夾娃娃・彈珠', cats:['arcade']}, play:{label:'玩樂', cats:['play']}
 };
 const LGBT = {gay:'🏳️‍🌈 男同志酒吧', lesbian:'🏳️‍🌈 女同志酒吧', mixed:'🏳️‍🌈 男女都歡迎'};
 const MEALS = new Set(['eat','eat2','fine','snack','bbq','hotpot','izakaya','night']);
@@ -613,10 +620,10 @@ const MEALS = new Set(['eat','eat2','fine','snack','bbq','hotpot','izakaya','nig
 const SLOT_OK = {
   morning:['sight','sweet','shop','massage','hairspa','cinema'],
   lunch:['fine','snack','bbq','hotpot','eat'],
-  afternoon:['sight','shop','sweet','massage','hairspa','cinema','ktv','market','nightview'],
+  afternoon:['sight','shop','sweet','massage','hairspa','cinema','ktv','market','nightview','arcade','play'],
   dinner:['fine','snack','bbq','hotpot','izakaya','eat2','market'],
-  night:['nightview','market','bar','gaybar','izakaya','ktv','cinema','massage','hairspa','hotpot','bbq','snack','sweet','sight'],
-  late:['bar','gaybar','ktv','massage','hairspa','night','izakaya','hotpot','bbq','snack']
+  night:['nightview','market','arcade','play','bar','gaybar','izakaya','ktv','cinema','massage','hairspa','hotpot','bbq','snack','sweet','sight'],
+  late:['bar','gaybar','ktv','arcade','play','massage','hairspa','night','izakaya','hotpot','bbq','snack']
 };
 const DEFAULTS = {morning:['sight','sweet'], lunch:['eat'], afternoon:['sight','shop','sweet'], dinner:['eat2'], night:['nightview','market','sweet'], late:['night']};
 const slotOf = t => { const m = ((t % 1440) + 1440) % 1440; return m < 300 ? 'late' : m < 630 ? 'morning' : m < 840 ? 'lunch' : m < 1020 ? 'afternoon' : m < 1230 ? 'dinner' : 'night'; };
@@ -828,6 +835,7 @@ function bestPlan(ctx, keep) {
 function reasons(p, s, ctx) {
   const r = [], m = mk(p.id);
   if (p.favorite) r.push({t:'你們常去', c:'hi'});
+  if (p.kind) r.push({t:p.kind, c:'hi'});
   if (p.karaoke) r.push({t:'可以唱歌', c:'hi'});
   if (p.view && p.cat !== 'nightview') r.push({t:'看得到夜景', c:'hi'});
   if (p.lgbt) r.push({t: LGBT[p.lgbt], c:'hi'});
@@ -985,6 +993,22 @@ function go(live) {
 }
 $('#goNow').onclick = () => go(true);
 $('#goNext').onclick = () => go(false);
+/* ---------- 隨機決定 ---------- */
+const RANDOM_POOL = ['sight','market','fine','nightview','snack','bbq','hotpot','massage','hairspa','izakaya','bar','ktv','cinema','arcade','play','arcade','play'];
+function randomGo() {
+  const pool = [...RANDOM_POOL].sort(() => Math.random() - 0.5), pick = [];
+  const n = 2 + Math.floor(Math.random() * 3);
+  for (const v of pool) { if (pick.length >= n) break; if (!pick.includes(v) && !(v === 'market' && pick.includes('nightview') && pick.length > 2)) pick.push(v); }
+  prefs.fun = pick;
+  const fits = window._fitRegions || [];
+  prefs.region = fits.length && Math.random() < 0.25 ? fits[Math.floor(Math.random() * fits.length)] : 'ks';
+  syncControls(); savePrefs(); go(false);
+  const names = pick.map(v => ($('#fun button[data-v="' + v + '"]') || {}).textContent || v);
+  const box = document.createElement('div'); box.className = 'dicebox';
+  box.innerHTML = '<span>🎲 抽到了：<b>' + esc(REGIONS[prefs.region].name) + '</b>・' + names.map(esc).join('、') + '</span><button class="btn" id="reDice">再抽一次</button>';
+  $('#planOut').prepend(box); $('#reDice').onclick = randomGo;
+}
+$('#goRandom').onclick = randomGo;
 
 /* ---------- 預約連結 ---------- */
 function bindBooking(root) {
@@ -1009,7 +1033,7 @@ let renderLimit = 60;
 function renderPlaces() {
   if (!places.length) return;
   const q = $('#q').value.trim(), r = $('#fRegion').value, c = $('#fCat').value;
-  let list = places.filter(p => (!r || p.region === r) && (!c || p.cat === c) && (!q || (p.name + p.area + REGION[p.region] + (CAT[p.cat]||'')).includes(q))).filter(p => {
+  let list = places.filter(p => (!r || p.region === r) && (!c || p.cat === c) && (!q || (p.name + p.area + REGION[p.region] + (CAT[p.cat]||'') + (p.kind||'')).includes(q))).filter(p => {
     const m = mk(p.id);
     return !fStatus || (fStatus === 'fav' && p.favorite) || (fStatus === 'both' && m.me && m.cm) || (fStatus === 'want' && (m.me || m.cm)) || (fStatus === 'been' && m.been) || (fStatus === 'no' && m.no) || (fStatus === 'sing' && p.karaoke) || (fStatus === 'view' && (p.view || p.cat === 'nightview')) || (fStatus === 'lgbt' && p.lgbt) || (fStatus === 'pr' && p.pr) || (fStatus === 'new' && isNew(p));
   }).sort((a, b) => (b.favorite ? 1 : 0) - (a.favorite ? 1 : 0) || trust(b) - trust(a));
