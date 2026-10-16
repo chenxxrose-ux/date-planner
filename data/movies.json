@@ -5,10 +5,10 @@
   "genre": "動作、恐怖、科幻",
   "runtime": 94,
   "rating": 3.9,
-  "ratingSrc": "LINE TODAY 觀眾評分 7.8/10（153 人）",
+  "ratingSrc": "LINE TODAY 觀眾評分 7.8/10（158 人）",
   "summary": "",
   "verdict": "普通",
-  "checked": "2026-10-10"
+  "checked": "2026-10-16"
  },
  "m1": {
   "title": "野獸之心",
@@ -16,10 +16,10 @@
   "genre": "冒險、動作、劇情、驚悚",
   "runtime": 101,
   "rating": 4.5,
-  "ratingSrc": "LINE TODAY 觀眾評分 9.1/10（75 人）",
+  "ratingSrc": "LINE TODAY 觀眾評分 9.1/10（84 人）",
   "summary": "",
   "verdict": "觀眾評分很高",
-  "checked": "2026-10-10"
+  "checked": "2026-10-16"
  },
  "m11": {
   "title": "劇場版 魔法少女小圓〈瓦爾普吉斯的迴天〉",
@@ -49,10 +49,10 @@
   "genre": "動作、喜劇、驚悚",
   "runtime": 99,
   "rating": 4.7,
-  "ratingSrc": "LINE TODAY 觀眾評分 9.4/10（32 人）",
+  "ratingSrc": "LINE TODAY 觀眾評分 9.4/10（33 人）",
   "summary": "",
   "verdict": "觀眾評分很高",
-  "checked": "2026-10-10"
+  "checked": "2026-10-16"
  },
  "m14": {
   "title": "鬼6咒",
@@ -63,7 +63,7 @@
   "ratingSrc": "LINE TODAY 觀眾評分 8.9/10（14 人）",
   "summary": "",
   "verdict": "觀眾評分很高",
-  "checked": "2026-10-10"
+  "checked": "2026-10-16"
  },
  "m15": {
   "title": "人吶，為什麼要跑步？",
@@ -93,10 +93,10 @@
   "genre": "劇情、喜劇",
   "runtime": 129,
   "rating": 4.2,
-  "ratingSrc": "LINE TODAY 觀眾評分 8.4/10（27 人）",
+  "ratingSrc": "LINE TODAY 觀眾評分 8.5/10（34 人）",
   "summary": "",
   "verdict": "評價不錯",
-  "checked": "2026-10-10"
+  "checked": "2026-10-16"
  },
  "m3": {
   "title": "蜘蛛人：重生日",
@@ -107,7 +107,7 @@
   "ratingSrc": "LINE TODAY 觀眾評分 9.1/10（224 人）",
   "summary": "",
   "verdict": "觀眾評分很高",
-  "checked": "2026-10-10"
+  "checked": "2026-10-16"
  },
  "m4": {
   "title": "網紅老爸",
@@ -137,10 +137,10 @@
   "genre": "奇幻、動作",
   "runtime": 101,
   "rating": 4.0,
-  "ratingSrc": "LINE TODAY 觀眾評分 8.0/10",
+  "ratingSrc": "LINE TODAY 觀眾評分 8.1/10（10 人）",
   "summary": "求職失意的男子遇襲身亡，72 小時後復活，發現自己每死一次就變得更強，同時被神秘男子追殺。",
   "verdict": "評價不錯",
-  "checked": "2026-10-10"
+  "checked": "2026-10-16"
  },
  "m7": {
   "title": "愛你致死不渝",
@@ -151,18 +151,7 @@
   "ratingSrc": "LINE TODAY 觀眾評分 7.2/10（60 人）",
   "summary": "",
   "verdict": "普通",
-  "checked": "2026-10-10"
- },
- "m8": {
-  "title": "劇場版 吉伊卡哇 人魚島的秘密",
-  "release": "2026-07-30",
-  "genre": "動畫、冒險、喜劇",
-  "runtime": 99,
-  "rating": 4.7,
-  "ratingSrc": "LINE TODAY 觀眾評分 9.3/10（55 人）",
-  "summary": "",
-  "verdict": "觀眾評分很高",
-  "checked": "2026-10-10"
+  "checked": "2026-10-16"
  },
  "m9": {
   "title": "神鬼劫案2：偷天換日",
@@ -173,29 +162,29 @@
   "ratingSrc": "LINE TODAY 觀眾評分 7.2/10（18 人）",
   "summary": "",
   "verdict": "普通",
-  "checked": "2026-10-10"
+  "checked": "2026-10-16"
  },
  "n0": {
   "title": "金劫任務",
   "release": "2026-10-08",
   "genre": "動作、犯罪、驚悚",
   "runtime": 100,
-  "rating": null,
-  "ratingSrc": "",
+  "rating": 4.5,
+  "ratingSrc": "LINE TODAY 觀眾評分 8.9/10（23 人）",
   "summary": "特務小隊奉命奪回被暴君盜走的十億美元，任務演變成策略與欺騙的全面戰爭。",
-  "verdict": "剛上映，評價還少",
-  "checked": "2026-10-10"
+  "verdict": "觀眾評分很高",
+  "checked": "2026-10-16"
  },
  "n1": {
   "title": "不存在的罪人",
   "release": "2026-10-08",
   "genre": "驚悚、懸疑",
   "runtime": 117,
-  "rating": null,
-  "ratingSrc": "",
+  "rating": 4.0,
+  "ratingSrc": "LINE TODAY 觀眾評分 8.1/10（14 人）",
   "summary": "代筆作家在資料中發現疑似親筆寫下的自傳手稿，真實與虛構逐漸模糊。改編自柯琳・胡佛暢銷小說《Verity》。",
-  "verdict": "剛上映，原著是全美暢銷小說",
-  "checked": "2026-10-10"
+  "verdict": "評價不錯",
+  "checked": "2026-10-16"
  },
  "n2": {
   "title": "驚天劫機",
@@ -273,5 +262,27 @@
   "summary": "",
   "verdict": "觀眾評分很高",
   "checked": "2026-10-10"
+ },
+ "a2610161": {
+  "title": "另一個媽咪",
+  "release": "2026-10-08",
+  "genre": "恐怖",
+  "runtime": 93,
+  "rating": 3.0,
+  "ratingSrc": "LINE TODAY 觀眾評分 5.9/10（16 人）",
+  "summary": "",
+  "verdict": "評價偏低",
+  "checked": "2026-10-16"
+ },
+ "a2610162": {
+  "title": "鬼入室",
+  "release": "2026-10-08",
+  "genre": "喜劇、恐怖",
+  "runtime": 108,
+  "rating": 4.9,
+  "ratingSrc": "LINE TODAY 觀眾評分 9.8/10（10 人）",
+  "summary": "",
+  "verdict": "觀眾評分很高",
+  "checked": "2026-10-16"
  }
 }
